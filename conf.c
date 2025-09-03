@@ -7,7 +7,11 @@ const char *progname = "slock";
 static char *user = NULL;
 static char *group = NULL;
 static char **colorname = NULL;
+#if HAVE_IMLIB
 static char *background_image = NULL;
+static int background_pixel_size = 0;
+static int background_blur_radius = 0;
+#endif
 static ResourcePref *resources = NULL;
 uint64_t settings = 0;
 static int num_resources = 0;
@@ -234,10 +238,6 @@ load_fallback_config(void)
 	if (!pam_service) {
 		disablefunc(PAMAuthentication);
 	}
-
-	if (!background_image || !strlen(background_image)) {
-		disablefunc(BackgroundImage);
-	}
 }
 
 void
@@ -272,11 +272,15 @@ load_misc(config_t *cfg)
 	config_lookup_float(cfg, "alpha", &alpha);
 	config_lookup_int(cfg, "quick_cancel_timeout_seconds", &timetocancel);
 	config_lookup_int(cfg, "dpms_timeout_in_seconds", &dpms_timeout);
+
 	#if HAVE_PAM
 	config_lookup_strdup(cfg, "pam_service", &pam_service);
 	#endif
+
 	#if HAVE_IMLIB
-	config_lookup_strdup(cfg, "background_image", &background_image);
+	config_lookup_strdup(cfg, "background.image", &background_image);
+	config_lookup_int(cfg, "background.pixel_size", &background_pixel_size);
+	config_lookup_int(cfg, "background.blur_radius", &background_blur_radius);
 	#endif
 
 	config_lookup_int(cfg, "blocks.height", &blocks_height);

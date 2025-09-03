@@ -4,9 +4,6 @@
 #if HAVE_IMLIB
 #include "background_image.h"
 #endif
-#if BLUR_PIXELATED_SCREEN_PATCH
-#include "blur_pixelated_screen.h"
-#endif
 
 #if DWM_LOGO_PATCH
 #include "dwmlogo.h"

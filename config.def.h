@@ -58,17 +58,6 @@ static const secretpass scom[] = {
 };
 #endif // SECRET_PASSWORD_PATCH
 
-#if BLUR_PIXELATED_SCREEN_PATCH
-/* Enable blur */
-#define BLUR
-/* Set blur radius */
-static const int blurRadius = 5;
-/* Enable Pixelation */
-//#define PIXELATION
-/* Set pixelation radius */
-static const int pixelSize = 10;
-#endif // BLUR_PIXELATED_SCREEN_PATCH
-
 /* Keypress feedback default settings */
 static int blocks_width = 55; // 0 = full width
 static int blocks_height = 0;

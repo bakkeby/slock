@@ -5,10 +5,6 @@
 #include "background_image.c"
 #endif
 
-#if BLUR_PIXELATED_SCREEN_PATCH
-#include "blur_pixelated_screen.c"
-#endif
-
 #if DWM_LOGO_PATCH
 #include "dwmlogo.c"
 #endif
