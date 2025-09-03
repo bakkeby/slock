@@ -14,11 +14,6 @@ static char *def_colorname[NUMCOLS] = {
 	[BLOCKS] = "#ffffff",   /* key feedback block */
 };
 
-#if BACKGROUND_IMAGE_PATCH
-/* Background image path, should be available to the user above */
-static const char * background_image = "";
-#endif // BACKGROUND_IMAGE_PATCH
-
 #if DWM_LOGO_PATCH
 /* insert grid pattern with scale 1:1, the size can be changed with logosize */
 static const int logosize = 75;

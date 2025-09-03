@@ -87,9 +87,9 @@ struct lock {
 	int screen;
 	Window root, win;
 	Pixmap pmap;
-	#if BLUR_PIXELATED_SCREEN_PATCH || BACKGROUND_IMAGE_PATCH
+	#if HAVE_IMLIB
 	Pixmap bgmap;
-	#endif // BLUR_PIXELATED_SCREEN_PATCH | BACKGROUND_IMAGE_PATCH
+	#endif
 	unsigned long colors[NUMCOLS];
 	#if DWM_LOGO_PATCH
 	unsigned int x, y;
@@ -291,7 +291,7 @@ readpw(Display *dpy, struct xrandr *rr, struct lock **locks, int nscreens,
 					for (screen = 0; screen < nscreens; screen++) {
 						#if DWM_LOGO_PATCH
 						drawlogo(dpy, locks[screen], color);
-						#elif BLUR_PIXELATED_SCREEN_PATCH || BACKGROUND_IMAGE_PATCH
+						#elif HAVE_IMLIB
 						if (locks[screen]->bgmap)
 							XSetWindowBackgroundPixmap(dpy, locks[screen]->win, locks[screen]->bgmap);
 						else
@@ -389,11 +389,11 @@ readpw(Display *dpy, struct xrandr *rr, struct lock **locks, int nscreens,
 				for (screen = 0; screen < nscreens; screen++) {
 					#if DWM_LOGO_PATCH
 					drawlogo(dpy, locks[screen], color);
-					#elif BLUR_PIXELATED_SCREEN_PATCH || BACKGROUND_IMAGE_PATCH
+					#elif HAVE_IMLIB
 					if (locks[screen]->bgmap)
 						XSetWindowBackgroundPixmap(dpy, locks[screen]->win, locks[screen]->bgmap);
 					else
-						XSetWindowBackground(dpy, locks[screen]->win, locks[screen]->colors[0]);
+						XSetWindowBackground(dpy, locks[screen]->win, locks[screen]->colors[color]);
 					XClearWindow(dpy, locks[screen]->win);
 					#else
 					XSetWindowBackground(dpy,
@@ -466,9 +466,11 @@ lockscreen(Display *dpy, struct xrandr *rr, int screen)
 	lock->screen = screen;
 	lock->root = RootWindow(dpy, lock->screen);
 
-	#if BLUR_PIXELATED_SCREEN_PATCH || BACKGROUND_IMAGE_PATCH
-	render_lock_image(dpy, lock, image);
-	#endif // BLUR_PIXELATED_SCREEN_PATCH | BACKGROUND_IMAGE_PATCH
+	#if HAVE_IMLIB
+	if (enabled(BackgroundImage)) {
+		render_lock_image(dpy, lock, image);
+	}
+	#endif
 
 	for (i = 0; i < NUMCOLS; i++) {
 		XAllocNamedColor(dpy, DefaultColormap(dpy, lock->screen),
@@ -517,10 +519,11 @@ lockscreen(Display *dpy, struct xrandr *rr, int screen)
 	                          CopyFromParent,
 	                          DefaultVisual(dpy, lock->screen),
 	                          CWOverrideRedirect | CWBackPixel, &wa);
-	#if BLUR_PIXELATED_SCREEN_PATCH || BACKGROUND_IMAGE_PATCH
+
+	#if HAVE_IMLIB
 	if (lock->bgmap)
 		XSetWindowBackgroundPixmap(dpy, lock->win, lock->bgmap);
-	#endif // BLUR_PIXELATED_SCREEN_PATCH | BACKGROUND_IMAGE_PATCH
+	#endif
 	lock->pmap = XCreateBitmapFromData(dpy, lock->win, curs, 8, 8);
 	invisible = XCreatePixmapCursor(dpy, lock->pmap, lock->pmap,
 	                                &color, &color, 0, 0);
@@ -657,9 +660,11 @@ main(int argc, char **argv) {
 
 	xrdb_init(dpy);
 
-	#if BLUR_PIXELATED_SCREEN_PATCH || BACKGROUND_IMAGE_PATCH
-	create_lock_image(dpy);
-	#endif // BLUR_PIXELATED_SCREEN_PATCH | BACKGROUND_IMAGE_PATCH
+	#if HAVE_IMLIB
+	if (enabled(BackgroundImage)) {
+		create_lock_image(dpy);
+	}
+	#endif
 
 	time_t t;
 	srand((unsigned) time(&t));

@@ -6,7 +6,7 @@ static const uint64_t
 	KeypressFeedback = 0x10,
 	TurnMonitorOff = 0x20,
 	PAMAuthentication = 0x40,
-	FuncPlaceholder0x80 = 0x80,
+	BackgroundImage = 0x80,
 	FuncPlaceholder0x100 = 0x100,
 	FuncPlaceholder0x200 = 0x200,
 	FuncPlaceholder0x400 = 0x400,
@@ -73,6 +73,7 @@ struct nv {
 
 static const struct nv functionality_names[] = {
 	map(Alpha),
+	map(BackgroundImage),
 	map(ControlClear),
 	map(KeypressFeedback),
 	map(MediaKeys),

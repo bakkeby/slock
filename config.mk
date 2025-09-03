@@ -18,6 +18,10 @@ PKG_CONFIG = pkg-config
 # Uncomment for NetBSD
 #NETBSD=-D_NETBSD_SOURCE
 
+# Uncomment for DWM_LOGO_PATCH
+#XINERAMA=-lXinerama
+#XINERAMAFLAGS = -DXINERAMA
+
 # Optionally slock can be compiled with PAM authentication support
 #PAMLIB=-lpam
 #PAM=-DHAVE_PAM=1
@@ -25,8 +29,9 @@ PKG_CONFIG = pkg-config
 # Optionally slock can be compiled with DPMS support
 #DPMS=-DHAVE_DPMS=1
 
-# Uncomment for blur pixelated screen and background image patches / BLUR_PIXELATED_SCREEN_PATCH, BACKGROUND_IMAGE_PATCH
+# Optionally slock can be compiled with image support, e.g. to render a background
 #IMLIB=-lImlib2
+#IM=-DHAVE_IMLIB=1
 
 CONFIG = `$(PKG_CONFIG) --libs libconfig`
 
@@ -35,7 +40,7 @@ INCS = -I. -I/usr/include -I${X11INC}
 LIBS = -L/usr/lib -lc -lcrypt -L${X11LIB} -lX11 -lXext -lXrandr ${XINERAMA} ${CONFIG} ${PAMLIB} ${IMLIB}
 
 # flags
-CPPFLAGS = -DVERSION=\"${VERSION}\" -D_DEFAULT_SOURCE -DHAVE_SHADOW_H ${XINERAMAFLAGS} ${DPMS} ${PAM} ${BSD} ${NETBSD}
+CPPFLAGS = -DVERSION=\"${VERSION}\" -D_DEFAULT_SOURCE -DHAVE_SHADOW_H ${XINERAMAFLAGS} ${DPMS} ${PAM} ${IM} ${BSD} ${NETBSD}
 CFLAGS = -std=c99 -pedantic -Wall -Wno-unused-function -Os ${INCS} ${CPPFLAGS}
 LDFLAGS = -s ${LIBS}
 COMPATSRC = explicit_bzero.c

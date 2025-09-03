@@ -7,6 +7,7 @@ const char *progname = "slock";
 static char *user = NULL;
 static char *group = NULL;
 static char **colorname = NULL;
+static char *background_image = NULL;
 static ResourcePref *resources = NULL;
 uint64_t settings = 0;
 static int num_resources = 0;
@@ -233,6 +234,10 @@ load_fallback_config(void)
 	if (!pam_service) {
 		disablefunc(PAMAuthentication);
 	}
+
+	if (!background_image || !strlen(background_image)) {
+		disablefunc(BackgroundImage);
+	}
 }
 
 void
@@ -269,6 +274,9 @@ load_misc(config_t *cfg)
 	config_lookup_int(cfg, "dpms_timeout_in_seconds", &dpms_timeout);
 	#if HAVE_PAM
 	config_lookup_strdup(cfg, "pam_service", &pam_service);
+	#endif
+	#if HAVE_IMLIB
+	config_lookup_strdup(cfg, "background_image", &background_image);
 	#endif
 
 	config_lookup_int(cfg, "blocks.height", &blocks_height);
@@ -340,10 +348,6 @@ generate_resource_strings(void)
 
 	#if PAMAUTH_PATCH
 	add_resource_binding("pamauth", &colorname[PAM]);
-	#endif
-
-	#if BACKGROUND_IMAGE_PATCH
-	add_resource_binding("bg_image", &def_background_image);
 	#endif
 }
 

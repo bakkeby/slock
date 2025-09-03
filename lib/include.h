@@ -1,9 +1,10 @@
 /* Patches */
 #include "func.h"
 
-#if BACKGROUND_IMAGE_PATCH
+#if HAVE_IMLIB
 #include "background_image.h"
-#elif BLUR_PIXELATED_SCREEN_PATCH
+#endif
+#if BLUR_PIXELATED_SCREEN_PATCH
 #include "blur_pixelated_screen.h"
 #endif
 
