@@ -46,23 +46,10 @@
  */
 #define COLOR_MESSAGE_PATCH 0
 
-/* This patch interacts with the Display Power Signaling and automatically shuts down
- * the monitor after a configurable amount of seconds.
- * The monitor will automatically be activated by pressing a key or moving the mouse
- * and the password can be entered then.
- * https://tools.suckless.org/slock/patches/dpms/
- */
-#define DPMS_PATCH 0
-
 /* This patch draws the dwm logo which changes color based on the state.
  * https://tools.suckless.org/slock/patches/dwmlogo/
  */
 #define DWM_LOGO_PATCH 0
-
-/* This patch allows for a command to be run after a specified number of incorrect attempts.
- * https://tools.suckless.org/slock/patches/failure-command/
- */
-#define FAILURE_COMMAND_PATCH 0
 
 /* This patch lets you add a message to your lock screen. You can place a default message
  * in config.h and you can also pass a message with the -m command line option.

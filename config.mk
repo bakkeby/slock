@@ -25,6 +25,9 @@ PKG_CONFIG = pkg-config
 # Uncomment for pam auth patch / PAMAUTH_PATCH
 #PAM=-lpam
 
+# Optionally slock can be compiled with DPMS support
+#DPMS=-DHAVE_DPMS=1
+
 # Uncomment for blur pixelated screen and background image patches / BLUR_PIXELATED_SCREEN_PATCH, BACKGROUND_IMAGE_PATCH
 #IMLIB=-lImlib2
 
@@ -35,7 +38,7 @@ INCS = -I. -I/usr/include -I${X11INC}
 LIBS = -L/usr/lib -lc -lcrypt -L${X11LIB} -lX11 -lXext -lXrandr ${XINERAMA} ${CONFIG} ${PAM} ${IMLIB}
 
 # flags
-CPPFLAGS = -DVERSION=\"${VERSION}\" -D_DEFAULT_SOURCE -DHAVE_SHADOW_H ${XINERAMAFLAGS} ${BSD} ${NETBSD}
+CPPFLAGS = -DVERSION=\"${VERSION}\" -D_DEFAULT_SOURCE -DHAVE_SHADOW_H ${XINERAMAFLAGS} ${DPMS} ${BSD} ${NETBSD}
 CFLAGS = -std=c99 -pedantic -Wall -Wno-unused-function -Os ${INCS} ${CPPFLAGS}
 LDFLAGS = -s ${LIBS}
 COMPATSRC = explicit_bzero.c

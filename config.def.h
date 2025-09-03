@@ -87,11 +87,6 @@ static const int blurRadius = 5;
 static const int pixelSize = 10;
 #endif // BLUR_PIXELATED_SCREEN_PATCH
 
-#if DPMS_PATCH
-/* time in seconds before the monitor shuts down */
-static const int monitortime = 5;
-#endif // DPMS_PATCH
-
 /* Keypress feedback default settings */
 static int blocks_width = 55; // 0 = full width
 static int blocks_height = 0;

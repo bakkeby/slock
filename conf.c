@@ -13,6 +13,7 @@ static int num_resources = 0;
 static char *failure_command = NULL;
 static int failure_command_run_once = 0;
 static int failure_count = 0;
+static int dpms_timeout = 0;
 
 static void set_config_path(const char* filename, char *config_path, char *config_file);
 
@@ -257,6 +258,7 @@ load_misc(config_t *cfg)
 	config_lookup_sloppy_bool(cfg, "fail_on_clear", &failonclear);
 	config_lookup_float(cfg, "alpha", &alpha);
 	config_lookup_int(cfg, "quick_cancel_timeout_seconds", &timetocancel);
+	config_lookup_int(cfg, "dpms_timeout_in_seconds", &dpms_timeout);
 
 	config_lookup_int(cfg, "blocks.height", &blocks_height);
 	config_lookup_int(cfg, "blocks.width", &blocks_width);

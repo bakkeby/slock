@@ -4,7 +4,7 @@ static const uint64_t
 	MediaKeys = 0x4,
 	TerminalKeys = 0x8,
 	KeypressFeedback = 0x10,
-	FuncPlaceholder0x20 = 0x20,
+	TurnMonitorOff = 0x20,
 	FuncPlaceholder0x40 = 0x40,
 	FuncPlaceholder0x80 = 0x80,
 	FuncPlaceholder0x100 = 0x100,
@@ -77,6 +77,7 @@ static const struct nv functionality_names[] = {
 	map(KeypressFeedback),
 	map(MediaKeys),
 	map(TerminalKeys),
+	map(TurnMonitorOff),
 	map(Xresources),
 	{ NULL, 0 }
 };

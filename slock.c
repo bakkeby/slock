@@ -28,9 +28,9 @@
 #include <X11/XKBlib.h>
 #include <X11/XF86keysym.h>
 #include <time.h>
-#if DPMS_PATCH
+#if HAVE_DPMS
 #include <X11/extensions/dpms.h>
-#endif // DPMS_PATCH
+#endif
 #ifdef XINERAMA
 #include <X11/extensions/Xinerama.h>
 #endif
@@ -608,9 +608,9 @@ main(int argc, char **argv) {
 	const char *hash;
 	Display *dpy;
 	int s, nlocks, nscreens;
-	#if DPMS_PATCH
+	#if HAVE_DPMS
 	CARD16 standby, suspend, off;
-	#endif // DPMS_PATCH
+	#endif
 	#if MESSAGE_PATCH || COLOR_MESSAGE_PATCH
 	int i, count_fonts;
 	char **font_names;
@@ -708,21 +708,23 @@ main(int argc, char **argv) {
 	if (nlocks != nscreens)
 		return 1;
 
-	#if DPMS_PATCH
-	/* DPMS magic to disable the monitor */
-	if (!DPMSCapable(dpy))
-		die("slock: DPMSCapable failed\n");
-	if (!DPMSEnable(dpy))
-		die("slock: DPMSEnable failed\n");
-	if (!DPMSGetTimeouts(dpy, &standby, &suspend, &off))
-		die("slock: DPMSGetTimeouts failed\n");
-	if (!standby || !suspend || !off)
-		die("slock: at least one DPMS variable is zero\n");
-	if (!DPMSSetTimeouts(dpy, monitortime, monitortime, monitortime))
-		die("slock: DPMSSetTimeouts failed\n");
+	#if HAVE_DPMS
+	if (enabled(TurnMonitorOff)) {
+		/* DPMS magic to disable the monitor */
+		if (!DPMSCapable(dpy))
+			die("slock: DPMSCapable failed\n");
+		if (!DPMSEnable(dpy))
+			die("slock: DPMSEnable failed\n");
+		if (!DPMSGetTimeouts(dpy, &standby, &suspend, &off))
+			die("slock: DPMSGetTimeouts failed\n");
+		if (!standby || !suspend || !off)
+			die("slock: at least one DPMS variable is zero\n");
+		if (!DPMSSetTimeouts(dpy, dpms_timeout, dpms_timeout, dpms_timeout))
+			die("slock: DPMSSetTimeouts failed\n");
 
-	XSync(dpy, 0);
-	#endif // DPMS_PATCH
+		XSync(dpy, 0);
+	}
+	#endif
 
 	/* run post-lock command */
 	if (argc > 0) {
@@ -737,11 +739,13 @@ main(int argc, char **argv) {
 
 	/* everything is now blank. Wait for the correct password */
 	readpw(dpy, &rr, locks, nscreens, hash);
-	#if DPMS_PATCH
-	/* reset DPMS values to inital ones */
-	DPMSSetTimeouts(dpy, standby, suspend, off);
-	XSync(dpy, 0);
-	#endif // DPMS_PATCH
+	#if HAVE_DPMS
+	if (enabled(TurnMonitorOff)) {
+		/* reset DPMS values to inital ones */
+		DPMSSetTimeouts(dpy, standby, suspend, off);
+		XSync(dpy, 0);
+	}
+	#endif // HAVE_DPMS
 
 	#if DWM_LOGO_PATCH
 	for (nlocks = 0, s = 0; s < nscreens; s++) {
