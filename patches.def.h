@@ -75,12 +75,6 @@
  */
 #define KEYPRESS_FEEDBACK_PATCH 0
 
-/* This patch allows media keys to be used while the screen is locked. Allows for volume
- * to be adjusted or to skip to the next song without having to unlock the screen first.
- * https://tools.suckless.org/slock/patches/mediakeys/
- */
-#define MEDIAKEYS_PATCH 0
-
 /* This patch lets you add a message to your lock screen. You can place a default message
  * in config.h and you can also pass a message with the -m command line option.
  * If you enable this then you also need to add the -lXinerama library to the LIBS

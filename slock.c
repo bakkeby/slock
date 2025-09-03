@@ -30,9 +30,7 @@
 #if CAPSCOLOR_PATCH
 #include <X11/XKBlib.h>
 #endif // CAPSCOLOR_PATCH
-#if MEDIAKEYS_PATCH
 #include <X11/XF86keysym.h>
-#endif // MEDIAKEYS_PATCH
 #if QUICKCANCEL_PATCH || AUTO_TIMEOUT_PATCH
 #include <time.h>
 #endif // QUICKCANCEL_PATCH / AUTO_TIMEOUT_PATCH
@@ -380,7 +378,6 @@ readpw(Display *dpy, struct xrandr *rr, struct lock **locks, int nscreens,
 				caps = !caps;
 				break;
 			#endif // CAPSCOLOR_PATCH
-			#if MEDIAKEYS_PATCH
 			case XF86XK_AudioLowerVolume:
 			case XF86XK_AudioMute:
 			case XF86XK_AudioRaiseVolume:
@@ -388,9 +385,10 @@ readpw(Display *dpy, struct xrandr *rr, struct lock **locks, int nscreens,
 			case XF86XK_AudioStop:
 			case XF86XK_AudioPrev:
 			case XF86XK_AudioNext:
-				XSendEvent(dpy, DefaultRootWindow(dpy), True, KeyPressMask, &ev);
-				break;
-			#endif // MEDIAKEYS_PATCH
+				if (enabled(MediaKeys)) {
+					XSendEvent(dpy, DefaultRootWindow(dpy), True, KeyPressMask, &ev);
+				}
+				continue;
 			default:
 				if (enabled(ControlClear) && iscntrl((int)buf[0]) && !num)
 					continue;
