@@ -36,7 +36,7 @@ resource_load(XrmDatabase db, char *name, enum resource_type rtype, void *dst)
 }
 
 void
-config_init(Display *dpy)
+xrdb_init(Display *dpy)
 {
 	char *resm;
 	XrmDatabase db;

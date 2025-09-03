@@ -1,8 +1,8 @@
 /* user and group to drop privileges to */
-static const char *user  = "nobody";
-static const char *group = "nogroup"; // use "nobody" for arch
+static const char *def_user  = "nobody";
+static const char *def_group = "nogroup"; // use "nobody" for arch
 
-static const char *colorname[NUMCOLS] = {
+static char *def_colorname[NUMCOLS] = {
 	#if DWM_LOGO_PATCH && !BLUR_PIXELATED_SCREEN_PATCH
 	[BACKGROUND] =  "#2d2d2d", /* after initialization */
 	#endif // DWM_LOGO_PATCH
@@ -62,19 +62,19 @@ static XRectangle rectangles[] = {
  */
 ResourcePref resources[] = {
 		#if DWM_LOGO_PATCH && !BLUR_PIXELATED_SCREEN_PATCH
-		{ "background",   STRING,  &colorname[BACKGROUND] },
+		{ "background",   STRING,  &def_colorname[BACKGROUND] },
 		#endif //DWM_LOGO_PATCH
 		#if BACKGROUND_IMAGE_PATCH
-		{ "bg_image",     STRING,  &background_image },
+		{ "bg_image",     STRING,  &def_background_image },
 		#endif // BACKGROUND_IMAGE_PATCH
-		{ "locked",       STRING,  &colorname[INIT] },
-		{ "input",        STRING,  &colorname[INPUT] },
-		{ "failed",       STRING,  &colorname[FAILED] },
+		{ "locked",       STRING,  &def_colorname[INIT] },
+		{ "input",        STRING,  &def_colorname[INPUT] },
+		{ "failed",       STRING,  &def_colorname[FAILED] },
 		#if CAPSCOLOR_PATCH
-		{ "capslock",     STRING,  &colorname[CAPS] },
+		{ "capslock",     STRING,  &def_colorname[CAPS] },
 		#endif // CAPSCOLOR_PATCH
 		#if PAMAUTH_PATCH
-		{ "pamauth",      STRING,  &colorname[PAM] },
+		{ "pamauth",      STRING,  &def_colorname[PAM] },
 		#endif // PAMAUTH_PATCH
 		#if MESSAGE_PATCH || COLOR_MESSAGE_PATCH
 		{ "message",      STRING,  &message },
@@ -90,7 +90,7 @@ static const float alpha = 0.9;
 #endif // ALPHA_PATCH
 
 /* treat a cleared input like a wrong password (color) */
-static const int failonclear = 1;
+static int failonclear = 1;
 
 #if AUTO_TIMEOUT_PATCH
 /* length of time (seconds) until */

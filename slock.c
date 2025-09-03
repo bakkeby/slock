@@ -103,6 +103,7 @@ struct secretpass {
 #endif // SECRET_PASSWORD_PATCH
 
 #include "config.h"
+#include "conf.c"
 
 struct lock {
 	int screen;
@@ -127,7 +128,7 @@ struct xrandr {
 	int errbase;
 };
 
-#include "patch/include.h"
+#include "lib/include.h"
 
 static void
 die(const char *errstr, ...)
@@ -140,7 +141,7 @@ die(const char *errstr, ...)
 	exit(1);
 }
 
-#include "patch/include.c"
+#include "lib/include.c"
 
 #ifdef __linux__
 #include <fcntl.h>
@@ -653,6 +654,9 @@ main(int argc, char **argv) {
 	int i, count_fonts;
 	char **font_names;
 	#endif // MESSAGE_PATCH | COLOR_MESSAGE_PATCH
+
+	load_config();
+
 	ARGBEGIN {
 	case 'v':
 		puts("slock-"VERSION);
@@ -712,7 +716,7 @@ main(int argc, char **argv) {
 		die("slock: setuid: %s\n", strerror(errno));
 
 	#if XRESOURCES_PATCH
-	config_init(dpy);
+	xrdb_init(dpy);
 	#endif // XRESOURCES_PATCH
 
 	#if BLUR_PIXELATED_SCREEN_PATCH || BACKGROUND_IMAGE_PATCH
@@ -791,6 +795,8 @@ main(int argc, char **argv) {
 	XSync(dpy, 0);
 	XCloseDisplay(dpy);
 	#endif // DWM_LOGO_PATCH
+
+	cleanup_config();
 
 	return 0;
 }
