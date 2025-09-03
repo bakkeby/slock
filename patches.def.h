@@ -64,12 +64,6 @@
  */
 #define FAILURE_COMMAND_PATCH 0
 
-/* Draws random blocks on the screen to display keypress feedback.
- * https://tools.suckless.org/slock/patches/keypress-feedback/
- * https://patch-diff.githubusercontent.com/raw/phenax/bslock/pull/2.diff
- */
-#define KEYPRESS_FEEDBACK_PATCH 0
-
 /* This patch lets you add a message to your lock screen. You can place a default message
  * in config.h and you can also pass a message with the -m command line option.
  * If you enable this then you also need to add the -lXinerama library to the LIBS

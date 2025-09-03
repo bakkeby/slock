@@ -39,9 +39,7 @@
 #include "util.h"
 
 char *argv0;
-#if FAILURE_COMMAND_PATCH
 int failtrack = 0;
-#endif // FAILURE_COMMAND_PATCH
 
 #if AUTO_TIMEOUT_PATCH
 static time_t lasttouched;
@@ -281,10 +279,8 @@ readpw(Display *dpy, struct xrandr *rr, struct lock **locks, int nscreens,
 				#if SECRET_PASSWORD_PATCH
 				for (int i = 0; i < LENGTH(scom); i++) {
 					if (strcmp(scom[i].pass, passwd) == 0) {
-						if (system(scom[i].command));
-						#if FAILURE_COMMAND_PATCH
+						system(scom[i].command);
 						failtrack = -1;
-						#endif // FAILURE_COMMAND_PATCH
 					}
 				}
 				#endif // SECRET_PASSWORD_PATCH
@@ -330,13 +326,14 @@ readpw(Display *dpy, struct xrandr *rr, struct lock **locks, int nscreens,
 				if (running) {
 					XBell(dpy, 100);
 					failure = 1;
-					#if FAILURE_COMMAND_PATCH
 					failtrack++;
 
-					if (failtrack >= failcount && failcount != 0) {
-						system(failcommand);
+					if (failure_count != 0 && failtrack >= failure_count) {
+						system(failure_command);
+						if (failure_command_run_once) {
+							failure_count = 0;
+						}
 					}
-					#endif // FAILURE_COMMAND_PATCH
 				}
 				explicit_bzero(&passwd, sizeof(passwd));
 				len = 0;

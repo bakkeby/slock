@@ -10,6 +10,9 @@ static char **colorname = NULL;
 static ResourcePref *resources = NULL;
 uint64_t settings = 0;
 static int num_resources = 0;
+static char *failure_command = NULL;
+static int failure_command_run_once = 0;
+static int failure_count = 0;
 
 static void set_config_path(const char* filename, char *config_path, char *config_file);
 
@@ -194,12 +197,6 @@ load_config(void)
 		load_functionality(&cfg);
 		load_misc(&cfg);
 		load_colors(&cfg);
-		// load_commands(&cfg);
-		// load_fonts(&cfg);
-		// load_keybindings(&cfg);
-		// load_mouse_bindings(&cfg);
-		// load_mouse_cursor(&cfg);
-		// load_window_icon(&cfg);
 	} else if (strcmp(config_error_text(&cfg), "file I/O error")) {
 		fprintf(stderr, "Error reading config at %s\n", config_file);
 		fprintf(stderr, "%s:%d - %s\n",
@@ -237,6 +234,7 @@ cleanup_config(void)
 
 	free(user);
 	free(group);
+	free(failure_command);
 
 	if (colorname != def_colorname) {
 		for (i = 0; i < NUMCOLS; i++) {
@@ -248,6 +246,7 @@ cleanup_config(void)
 	for (i = 0; i < num_resources; i++)
 		free(resources[i].name);
 	free(resources);
+
 }
 
 void
@@ -267,6 +266,10 @@ load_misc(config_t *cfg)
 	config_lookup_int(cfg, "blocks.max_y", &blocks_y_max);
 	config_lookup_int(cfg, "blocks.min_x", &blocks_x_min);
 	config_lookup_int(cfg, "blocks.max_x", &blocks_x_max);
+
+	config_lookup_int(cfg, "on_failure.after_this_many_failures", &failure_count);
+	config_lookup_sloppy_bool(cfg, "on_failure.run_once", &failure_command_run_once);
+	config_lookup_strdup(cfg, "on_failure.run_command", &failure_command);
 }
 
 void
@@ -348,4 +351,3 @@ add_resource_binding(const char *string, void *ptr)
 	resources[num_resources].dst = ptr;
 	num_resources++;
 }
-

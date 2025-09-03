@@ -69,15 +69,6 @@ static const int runonce = 0;
 static const char *command = "doas poweroff";
 #endif // AUTO_TIMEOUT_PATCH
 
-#if FAILURE_COMMAND_PATCH
-/* number of failed password attempts until failcommand is executed.
-   Set to 0 to disable */
-static const int failcount = 0;
-
-/* command to be executed after [failcount] failed password attempts */
-static const char *failcommand = "shutdown";
-#endif // FAILURE_COMMAND_PATCH
-
 #if SECRET_PASSWORD_PATCH
 static const secretpass scom[] = {
 	/* Password             command */
