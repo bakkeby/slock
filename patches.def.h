@@ -117,8 +117,3 @@
  * https://tools.suckless.org/slock/patches/unlock_screen/
  */
 #define UNLOCKSCREEN_PATCH 0
-
-/* This patch adds the ability to get colors via Xresources.
- * https://tools.suckless.org/slock/patches/xresources/
- */
-#define XRESOURCES_PATCH 0

@@ -25,6 +25,4 @@
 #include "pamauth.c"
 #endif
 
-#if XRESOURCES_PATCH
 #include "xresources.c"
-#endif

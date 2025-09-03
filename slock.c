@@ -76,7 +76,6 @@ enum {
 	NUMCOLS
 };
 
-#if XRESOURCES_PATCH
 /* Xresources preferences */
 enum resource_type {
 	STRING = 0,
@@ -89,7 +88,6 @@ typedef struct {
 	enum resource_type type;
 	void *dst;
 } ResourcePref;
-#endif // XRESOURCES_PATCH
 
 #if SECRET_PASSWORD_PATCH
 typedef struct secretpass secretpass;
@@ -711,9 +709,7 @@ main(int argc, char **argv) {
 	if (setuid(duid) < 0)
 		die("slock: setuid: %s\n", strerror(errno));
 
-	#if XRESOURCES_PATCH
 	xrdb_init(dpy);
-	#endif // XRESOURCES_PATCH
 
 	#if BLUR_PIXELATED_SCREEN_PATCH || BACKGROUND_IMAGE_PATCH
 	create_lock_image(dpy);
