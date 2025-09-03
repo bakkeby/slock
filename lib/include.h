@@ -11,7 +11,7 @@
 #include "dwmlogo.h"
 #endif
 
-#if PAMAUTH_PATCH
+#if HAVE_PAM
 #include "pamauth.h"
 #endif
 

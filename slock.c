@@ -55,9 +55,7 @@ enum {
 	INPUT,
 	FAILED,
 	CAPS,
-	#if PAMAUTH_PATCH
 	PAM,
-	#endif // PAMAUTH_PATCH
 	BLOCKS,
 	NUMCOLS
 };
@@ -188,10 +186,11 @@ gethash(void)
 	}
 #endif /* HAVE_SHADOW_H */
 
-	#if PAMAUTH_PATCH
-	/* pam, store user name */
-	hash = pw->pw_name;
-	#endif // PAMAUTH_PATCH
+	if (enabled(PAMAuthentication)) {
+		/* pam, store user name */
+		hash = pw->pw_name;
+	}
+
 	return hash;
 }
 
@@ -200,13 +199,11 @@ readpw(Display *dpy, struct xrandr *rr, struct lock **locks, int nscreens,
        const char *hash)
 {
 	XRRScreenChangeNotifyEvent *rre;
-	#if PAMAUTH_PATCH
+
 	char buf[32];
 	int retval;
 	pam_handle_t *pamh;
-	#else
-	char buf[32], passwd[256], *inputhash;
-	#endif // PAMAUTH_PATCH
+	char passwd[256], *inputhash;
 	int num, screen, running, failure, oldc;
 	unsigned int len, color;
 	#if AUTO_TIMEOUT_PATCH
@@ -285,44 +282,49 @@ readpw(Display *dpy, struct xrandr *rr, struct lock **locks, int nscreens,
 				}
 				#endif // SECRET_PASSWORD_PATCH
 
-				#if PAMAUTH_PATCH
-				retval = pam_start(pam_service, hash, &pamc, &pamh);
-				color = PAM;
-				for (screen = 0; screen < nscreens; screen++) {
-					#if DWM_LOGO_PATCH
-					drawlogo(dpy, locks[screen], color);
-					#elif BLUR_PIXELATED_SCREEN_PATCH || BACKGROUND_IMAGE_PATCH
-					if (locks[screen]->bgmap)
-						XSetWindowBackgroundPixmap(dpy, locks[screen]->win, locks[screen]->bgmap);
+				#if HAVE_PAM
+				if (enabled(PAMAuthentication)) {
+					retval = pam_start(pam_service, hash, &pamc, &pamh);
+					color = PAM;
+					for (screen = 0; screen < nscreens; screen++) {
+						#if DWM_LOGO_PATCH
+						drawlogo(dpy, locks[screen], color);
+						#elif BLUR_PIXELATED_SCREEN_PATCH || BACKGROUND_IMAGE_PATCH
+						if (locks[screen]->bgmap)
+							XSetWindowBackgroundPixmap(dpy, locks[screen]->win, locks[screen]->bgmap);
+						else
+							XSetWindowBackground(dpy, locks[screen]->win, locks[screen]->colors[0]);
+						XClearWindow(dpy, locks[screen]->win);
+						#else
+						XSetWindowBackground(dpy, locks[screen]->win, locks[screen]->colors[color]);
+						XClearWindow(dpy, locks[screen]->win);
+						XRaiseWindow(dpy, locks[screen]->win);
+						#endif // BLUR_PIXELATED_SCREEN_PATCH
+
+					}
+					XSync(dpy, False);
+
+					if (retval == PAM_SUCCESS)
+						retval = pam_authenticate(pamh, 0);
+					if (retval == PAM_SUCCESS)
+						retval = pam_acct_mgmt(pamh, 0);
+
+					running = 1;
+					if (retval == PAM_SUCCESS)
+						running = 0;
 					else
-						XSetWindowBackground(dpy, locks[screen]->win, locks[screen]->colors[0]);
-					XClearWindow(dpy, locks[screen]->win);
-					#else
-					XSetWindowBackground(dpy, locks[screen]->win, locks[screen]->colors[color]);
-					XClearWindow(dpy, locks[screen]->win);
-					XRaiseWindow(dpy, locks[screen]->win);
-					#endif // BLUR_PIXELATED_SCREEN_PATCH
-
+						fprintf(stderr, "slock: %s\n", pam_strerror(pamh, retval));
+					pam_end(pamh, retval);
+				} else {
+				#endif
+					if (!(inputhash = crypt(passwd, hash)))
+						fprintf(stderr, "slock: crypt: %s\n", strerror(errno));
+					else
+						running = !!strcmp(inputhash, hash);
+				#if HAVE_PAM
 				}
-				XSync(dpy, False);
+				#endif
 
-				if (retval == PAM_SUCCESS)
-					retval = pam_authenticate(pamh, 0);
-				if (retval == PAM_SUCCESS)
-					retval = pam_acct_mgmt(pamh, 0);
-
-				running = 1;
-				if (retval == PAM_SUCCESS)
-					running = 0;
-				else
-					fprintf(stderr, "slock: %s\n", pam_strerror(pamh, retval));
-				pam_end(pamh, retval);
-				#else
-				if (!(inputhash = crypt(passwd, hash)))
-					fprintf(stderr, "slock: crypt: %s\n", strerror(errno));
-				else
-					running = !!strcmp(inputhash, hash);
-				#endif // PAMAUTH_PATCH
 				if (running) {
 					XBell(dpy, 100);
 					failure = 1;
@@ -655,15 +657,14 @@ main(int argc, char **argv) {
 	dontkillme();
 #endif
 
-	#if PAMAUTH_PATCH
-	/* the contents of hash are used to transport the current user name */
-	#endif // PAMAUTH_PATCH
+	/* If PAM authentication is used then the contents of hash are used
+	 * to transport the current user name */
 	hash = gethash();
 	errno = 0;
-	#if !PAMAUTH_PATCH
-	if (!crypt("", hash))
+
+	if (disabled(PAMAuthentication) && !crypt("", hash)) {
 		die("slock: crypt: %s\n", strerror(errno));
-	#endif // PAMAUTH_PATCH
+	}
 
 	if (!(dpy = XOpenDisplay(NULL)))
 		die("slock: cannot open display\n");

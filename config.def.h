@@ -10,9 +10,7 @@ static char *def_colorname[NUMCOLS] = {
 	[INPUT] =  "#005577",   /* during input */
 	[FAILED] = "#CC3333",   /* wrong password */
 	[CAPS] =   "red",       /* CapsLock on */
-	#if PAMAUTH_PATCH
 	[PAM] =    "#9400D3",   /* waiting for PAM */
-	#endif // PAMAUTH_PATCH
 	[BLOCKS] = "#ffffff",   /* key feedback block */
 };
 
@@ -100,13 +98,6 @@ static int blocks_y_min = 0;
 static int blocks_y_max = 0;
 static int blocks_x_min = 0;
 static int blocks_x_max = 0;
-
-
-
-#if PAMAUTH_PATCH
-/* PAM service that's used for authentication */
-static const char* pam_service = "login";
-#endif // PAMAUTH_PATCH
 
 /* time in seconds to cancel lock with mouse movement or keypress */
 static int timetocancel = 0;

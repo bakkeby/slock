@@ -22,8 +22,9 @@ PKG_CONFIG = pkg-config
 #XINERAMA=-lXinerama
 #XINERAMAFLAGS = -DXINERAMA
 
-# Uncomment for pam auth patch / PAMAUTH_PATCH
-#PAM=-lpam
+# Optionally slock can be compiled with PAM authentication support
+#PAMLIB=-lpam
+#PAM=-DHAVE_PAM=1
 
 # Optionally slock can be compiled with DPMS support
 #DPMS=-DHAVE_DPMS=1
@@ -35,10 +36,10 @@ CONFIG = `$(PKG_CONFIG) --libs libconfig`
 
 # includes and libs
 INCS = -I. -I/usr/include -I${X11INC}
-LIBS = -L/usr/lib -lc -lcrypt -L${X11LIB} -lX11 -lXext -lXrandr ${XINERAMA} ${CONFIG} ${PAM} ${IMLIB}
+LIBS = -L/usr/lib -lc -lcrypt -L${X11LIB} -lX11 -lXext -lXrandr ${XINERAMA} ${CONFIG} ${PAMLIB} ${IMLIB}
 
 # flags
-CPPFLAGS = -DVERSION=\"${VERSION}\" -D_DEFAULT_SOURCE -DHAVE_SHADOW_H ${XINERAMAFLAGS} ${DPMS} ${BSD} ${NETBSD}
+CPPFLAGS = -DVERSION=\"${VERSION}\" -D_DEFAULT_SOURCE -DHAVE_SHADOW_H ${XINERAMAFLAGS} ${DPMS} ${PAM} ${BSD} ${NETBSD}
 CFLAGS = -std=c99 -pedantic -Wall -Wno-unused-function -Os ${INCS} ${CPPFLAGS}
 LDFLAGS = -s ${LIBS}
 COMPATSRC = explicit_bzero.c

@@ -15,6 +15,9 @@ static int failure_command_run_once = 0;
 static int failure_count = 0;
 static int dpms_timeout = 0;
 
+/* PAM service that's used for authentication */
+static char* pam_service = NULL;
+
 static void set_config_path(const char* filename, char *config_path, char *config_file);
 
 static int config_lookup_strdup(const config_t *cfg, const char *name, char **strptr);
@@ -226,6 +229,10 @@ load_fallback_config(void)
 	if (!colorname) {
 		colorname = def_colorname;
 	}
+
+	if (!pam_service) {
+		disablefunc(PAMAuthentication);
+	}
 }
 
 void
@@ -236,6 +243,7 @@ cleanup_config(void)
 	free(user);
 	free(group);
 	free(failure_command);
+	free(pam_service);
 
 	if (colorname != def_colorname) {
 		for (i = 0; i < NUMCOLS; i++) {
@@ -259,6 +267,9 @@ load_misc(config_t *cfg)
 	config_lookup_float(cfg, "alpha", &alpha);
 	config_lookup_int(cfg, "quick_cancel_timeout_seconds", &timetocancel);
 	config_lookup_int(cfg, "dpms_timeout_in_seconds", &dpms_timeout);
+	#if HAVE_PAM
+	config_lookup_strdup(cfg, "pam_service", &pam_service);
+	#endif
 
 	config_lookup_int(cfg, "blocks.height", &blocks_height);
 	config_lookup_int(cfg, "blocks.width", &blocks_width);
@@ -292,11 +303,8 @@ load_colors(config_t *cfg)
 	config_setting_lookup_strdup(cols, "input", &colorname[INPUT]);
 	config_setting_lookup_strdup(cols, "failed", &colorname[FAILED]);
 	config_setting_lookup_strdup(cols, "caps", &colorname[CAPS]);
-	config_setting_lookup_strdup(cols, "blocks", &colorname[BLOCKS]);
-
-	#if PAMAUTH_PATCH
 	config_setting_lookup_strdup(cols, "pam", &colorname[PAM]);
-	#endif // PAMAUTH_PATCH
+	config_setting_lookup_strdup(cols, "blocks", &colorname[BLOCKS]);
 }
 
 void

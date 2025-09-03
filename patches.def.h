@@ -59,15 +59,6 @@
  */
 #define MESSAGE_PATCH 0
 
-/* Replaces shadow support with PAM authentication support.
- * Change variable pam_service in config.def.h to the corresponding PAM service.
- * The default configuration is for ArchLinux's login service.
- * If you enable this then you also need to add the -lpam library to the LIBS configuration
- * in config.mk. Look for and uncomment the PAM placeholder.
- * https://tools.suckless.org/slock/patches/pam_auth/
- */
-#define PAMAUTH_PATCH 0
-
 /* This patch allows for commands to be executed when the user enters special passwords.
  * https://tools.suckless.org/slock/patches/secret-password/
  */
