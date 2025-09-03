@@ -244,10 +244,8 @@ load_colors(config_t *cfg)
 	config_setting_lookup_strdup(cols, "init", &colorname[INIT]);
 	config_setting_lookup_strdup(cols, "input", &colorname[INPUT]);
 	config_setting_lookup_strdup(cols, "failed", &colorname[FAILED]);
-
-	#if CAPSCOLOR_PATCH
 	config_setting_lookup_strdup(cols, "caps", &colorname[CAPS]);
-	#endif
+
 	#if PAMAUTH_PATCH
 	config_setting_lookup_strdup(cols, "pam", &colorname[PAM]);
 	#endif // PAMAUTH_PATCH
@@ -285,10 +283,7 @@ generate_resource_strings(void)
 	add_resource_binding("locked", &colorname[INIT]);
 	add_resource_binding("input", &colorname[INPUT]);
 	add_resource_binding("failed", &colorname[FAILED]);
-
-	#if CAPSCOLOR_PATCH
 	add_resource_binding("capslock", &colorname[CAPS]);
-	#endif
 
 	#if PAMAUTH_PATCH
 	add_resource_binding("pamauth", &colorname[PAM]);

@@ -30,11 +30,6 @@
  */
 #define BLUR_PIXELATED_SCREEN_PATCH 0
 
-/* This patch introduces an additional color to indicate the state of Caps Lock.
- * https://tools.suckless.org/slock/patches/capscolor/
- */
-#define CAPSCOLOR_PATCH 0
-
 /* Based on the message patch this patch lets you add a message to your lock screen using 24 bit
  * color ANSI escape codes.
  *

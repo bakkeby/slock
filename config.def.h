@@ -9,9 +9,7 @@ static char *def_colorname[NUMCOLS] = {
 	[INIT] =   "black",     /* after initialization */
 	[INPUT] =  "#005577",   /* during input */
 	[FAILED] = "#CC3333",   /* wrong password */
-	#if CAPSCOLOR_PATCH
 	[CAPS] =   "red",       /* CapsLock on */
-	#endif // CAPSCOLOR_PATCH
 	#if PAMAUTH_PATCH
 	[PAM] =    "#9400D3",   /* waiting for PAM */
 	#endif // PAMAUTH_PATCH

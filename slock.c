@@ -27,9 +27,7 @@
 #if KEYPRESS_FEEDBACK_PATCH
 #include <time.h>
 #endif // KEYPRESS_FEEDBACK_PATCH
-#if CAPSCOLOR_PATCH
 #include <X11/XKBlib.h>
-#endif // CAPSCOLOR_PATCH
 #include <X11/XF86keysym.h>
 #if QUICKCANCEL_PATCH || AUTO_TIMEOUT_PATCH
 #include <time.h>
@@ -64,9 +62,7 @@ enum {
 	INIT,
 	INPUT,
 	FAILED,
-	#if CAPSCOLOR_PATCH
 	CAPS,
-	#endif // CAPSCOLOR_PATCH
 	#if PAMAUTH_PATCH
 	PAM,
 	#endif // PAMAUTH_PATCH
@@ -226,26 +222,20 @@ readpw(Display *dpy, struct xrandr *rr, struct lock **locks, int nscreens,
 	#if AUTO_TIMEOUT_PATCH
 	time_t currenttime;
 	#endif // AUTO_TIMEOUT_PATCH
-	#if CAPSCOLOR_PATCH
 	int caps;
 	unsigned int indicators;
-	#endif // CAPSCOLOR_PATCH
 	KeySym ksym;
 	XEvent ev;
 
 	len = 0;
-	#if CAPSCOLOR_PATCH
 	caps = 0;
-	#endif // CAPSCOLOR_PATCH
 	running = 1;
 	failure = 0;
 	oldc = INIT;
 
-	#if CAPSCOLOR_PATCH
 	if (!XkbGetIndicatorState(dpy, XkbUseCoreKbd, &indicators))
 		caps = indicators & 1;
 
-	#endif // CAPSCOLOR_PATCH
 	#if AUTO_TIMEOUT_PATCH
 	while (running)
 	#else
@@ -371,11 +361,9 @@ readpw(Display *dpy, struct xrandr *rr, struct lock **locks, int nscreens,
 				if (len)
 					passwd[--len] = '\0';
 				break;
-			#if CAPSCOLOR_PATCH
 			case XK_Caps_Lock:
 				caps = !caps;
 				break;
-			#endif // CAPSCOLOR_PATCH
 			case XF86XK_AudioLowerVolume:
 			case XF86XK_AudioMute:
 			case XF86XK_AudioRaiseVolume:
@@ -407,11 +395,7 @@ readpw(Display *dpy, struct xrandr *rr, struct lock **locks, int nscreens,
 				#endif // KEYPRESS_FEEDBACK_PATCH
 				break;
 			}
-			#if CAPSCOLOR_PATCH
 			color = len ? (caps ? CAPS : INPUT) : (failure || failonclear ? FAILED : INIT);
-			#else
-			color = len ? INPUT : ((failure || failonclear) ? FAILED : INIT);
-			#endif // CAPSCOLOR_PATCH
 			if (running && oldc != color) {
 				for (screen = 0; screen < nscreens; screen++) {
 					#if DWM_LOGO_PATCH
