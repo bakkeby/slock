@@ -342,12 +342,6 @@ generate_resource_strings(void)
 	add_resource_binding("pamauth", &colorname[PAM]);
 	#endif
 
-	#if MESSAGE_PATCH || COLOR_MESSAGE_PATCH
-	add_resource_binding("message", &message);
-	add_resource_binding("text_color", &text_color);
-	add_resource_binding("font_name", &font_name);
-	#endif
-
 	#if BACKGROUND_IMAGE_PATCH
 	add_resource_binding("bg_image", &def_background_image);
 	#endif

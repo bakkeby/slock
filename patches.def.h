@@ -30,34 +30,10 @@
  */
 #define BLUR_PIXELATED_SCREEN_PATCH 0
 
-/* Based on the message patch this patch lets you add a message to your lock screen using 24 bit
- * color ANSI escape codes.
- *
- * You can place a default message in config.h and you can also pass a message with the -m command
- * line option.
- *
- * Practical example:
- *    slock -m "$(printf "text colored \x1b[38;2;0;255;0m green\x1b[39m\n")"
- *
- * If you enable this then you also need to add the -lXinerama library to the LIBS
- * configuration in config.mk. Look for and uncomment the XINERAMA placeholder.
- *
- * https://tools.suckless.org/slock/patches/colormessage/
- */
-#define COLOR_MESSAGE_PATCH 0
-
 /* This patch draws the dwm logo which changes color based on the state.
  * https://tools.suckless.org/slock/patches/dwmlogo/
  */
 #define DWM_LOGO_PATCH 0
-
-/* This patch lets you add a message to your lock screen. You can place a default message
- * in config.h and you can also pass a message with the -m command line option.
- * If you enable this then you also need to add the -lXinerama library to the LIBS
- * configuration in config.mk. Look for and uncomment the XINERAMA placeholder.
- * https://tools.suckless.org/slock/patches/message/
- */
-#define MESSAGE_PATCH 0
 
 /* This patch allows for commands to be executed when the user enters special passwords.
  * https://tools.suckless.org/slock/patches/secret-password/

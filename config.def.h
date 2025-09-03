@@ -14,17 +14,6 @@ static char *def_colorname[NUMCOLS] = {
 	[BLOCKS] = "#ffffff",   /* key feedback block */
 };
 
-#if MESSAGE_PATCH || COLOR_MESSAGE_PATCH
-/* default message */
-static const char * message = "Suckless: Software that sucks less.";
-
-/* text color */
-static const char * text_color = "#ffffff";
-
-/* text size (must be a valid size) */
-static const char * font_name = "6x10";
-#endif // MESSAGE_PATCH | COLOR_MESSAGE_PATCH
-
 #if BACKGROUND_IMAGE_PATCH
 /* Background image path, should be available to the user above */
 static const char * background_image = "";

@@ -18,10 +18,6 @@ PKG_CONFIG = pkg-config
 # Uncomment for NetBSD
 #NETBSD=-D_NETBSD_SOURCE
 
-# Uncomment for message patch / MESSAGE_PATCH / COLORMESSAGE_PATCH / DWM_LOGO_PATCH
-#XINERAMA=-lXinerama
-#XINERAMAFLAGS = -DXINERAMA
-
 # Optionally slock can be compiled with PAM authentication support
 #PAMLIB=-lpam
 #PAM=-DHAVE_PAM=1

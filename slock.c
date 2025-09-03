@@ -201,8 +201,10 @@ readpw(Display *dpy, struct xrandr *rr, struct lock **locks, int nscreens,
 	XRRScreenChangeNotifyEvent *rre;
 
 	char buf[32];
+	#if HAVE_PAM
 	int retval;
 	pam_handle_t *pamh;
+	#endif
 	char passwd[256], *inputhash;
 	int num, screen, running, failure, oldc;
 	unsigned int len, color;
@@ -399,9 +401,6 @@ readpw(Display *dpy, struct xrandr *rr, struct lock **locks, int nscreens,
 					                     locks[screen]->colors[color]);
 					XClearWindow(dpy, locks[screen]->win);
 					#endif // BLUR_PIXELATED_SCREEN_PATCH
-					#if MESSAGE_PATCH || COLOR_MESSAGE_PATCH
-					writemessage(dpy, locks[screen]->win, screen);
-					#endif // MESSAGE_PATCH | COLOR_MESSAGE_PATCH
 				}
 				oldc = color;
 			}
@@ -592,11 +591,7 @@ lockscreen(Display *dpy, struct xrandr *rr, int screen)
 static void
 usage(void)
 {
-	#if MESSAGE_PATCH || COLOR_MESSAGE_PATCH
-	die("usage: slock [-v] [-f] [-m message] [cmd [arg ...]]\n");
-	#else
 	die("usage: slock [-v] [cmd [arg ...]]\n");
-	#endif // MESSAGE_PATCH | COLOR_MESSAGE_PATCH
 }
 
 int
@@ -613,10 +608,6 @@ main(int argc, char **argv) {
 	#if HAVE_DPMS
 	CARD16 standby, suspend, off;
 	#endif
-	#if MESSAGE_PATCH || COLOR_MESSAGE_PATCH
-	int i, count_fonts;
-	char **font_names;
-	#endif // MESSAGE_PATCH | COLOR_MESSAGE_PATCH
 
 	load_config();
 
@@ -624,19 +615,6 @@ main(int argc, char **argv) {
 	case 'v':
 		puts("slock-"VERSION);
 		return 0;
-	#if MESSAGE_PATCH || COLOR_MESSAGE_PATCH
-	case 'm':
-		message = EARGF(usage());
-		break;
-	case 'f':
-		if (!(dpy = XOpenDisplay(NULL)))
-			die("slock: cannot open display\n");
-		font_names = XListFonts(dpy, "*", 10000 /* list 10000 fonts*/, &count_fonts);
-		for (i=0; i<count_fonts; i++) {
-			fprintf(stderr, "%s\n", *(font_names+i));
-		}
-		return 0;
-	#endif // MESSAGE_PATCH | COLOR_MESSAGE_PATCH
 	default:
 		usage();
 	} ARGEND
@@ -695,9 +673,6 @@ main(int argc, char **argv) {
 		die("slock: out of memory\n");
 	for (nlocks = 0, s = 0; s < nscreens; s++) {
 		if ((locks[s] = lockscreen(dpy, &rr, s)) != NULL) {
-			#if MESSAGE_PATCH || COLOR_MESSAGE_PATCH
-			writemessage(dpy, locks[s]->win, s);
-			#endif // MESSAGE_PATCH | COLOR_MESSAGE_PATCH
 			nlocks++;
 		} else {
 			break;
