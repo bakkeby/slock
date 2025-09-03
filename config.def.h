@@ -56,10 +56,8 @@ static XRectangle rectangles[] = {
 };
 #endif // DWM_LOGO_PATCH
 
-#if ALPHA_PATCH
 /* lock screen opacity */
-static const float alpha = 0.9;
-#endif // ALPHA_PATCH
+static double alpha = 0.3;
 
 /* treat a cleared input like a wrong password (color) */
 static int failonclear = 1;

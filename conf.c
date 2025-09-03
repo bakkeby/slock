@@ -20,6 +20,10 @@ static int config_lookup_sloppy_bool(const config_t *cfg, const char *name, int 
 static int config_setting_lookup_sloppy_bool(const config_setting_t *cfg, const char *name, int *ptr);
 static int _config_setting_get_sloppy_bool(const config_setting_t *cfg, int *ptr);
 
+static int config_lookup_simple_float(const config_t *cfg, const char *name, float *floatptr);
+static int config_setting_lookup_simple_float(const config_setting_t *cfg, const char *name, float *floatptr);
+static int _config_setting_get_simple_float(const config_setting_t *cfg_item, float *floatptr);
+
 static void cleanup_config(void);
 static void load_config(void);
 static void load_fallback_config(void);
@@ -117,6 +121,30 @@ _config_setting_get_sloppy_bool(const config_setting_t *cfg_item, int *ptr)
 	return 0;
 }
 
+int
+config_lookup_simple_float(const config_t *cfg, const char *name, float *floatptr)
+{
+	return _config_setting_get_simple_float(config_lookup(cfg, name), floatptr);
+}
+
+int
+config_setting_lookup_simple_float(const config_setting_t *cfg, const char *name, float *floatptr)
+{
+	return _config_setting_get_simple_float(config_setting_lookup(cfg, name), floatptr);
+}
+
+int
+_config_setting_get_simple_float(const config_setting_t *cfg_item, float *floatptr)
+{
+	if (!cfg_item)
+		return 0;
+
+	double value = config_setting_get_float(cfg_item);
+
+	*floatptr = (float)value;
+	return 1;
+}
+
 void
 load_config(void)
 {
@@ -194,6 +222,7 @@ load_misc(config_t *cfg)
 	config_lookup_strdup(cfg, "user", &user);
 	config_lookup_strdup(cfg, "group", &group);
 	config_lookup_sloppy_bool(cfg, "fail_on_clear", &failonclear);
+	config_lookup_float(cfg, "alpha", &alpha);
 }
 
 void

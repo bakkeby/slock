@@ -22,9 +22,7 @@
 #include <X11/Xutil.h>
 
 #include "patches.h"
-#if ALPHA_PATCH
 #include <X11/Xatom.h>
-#endif // ALPHA_PATCH
 #if KEYPRESS_FEEDBACK_PATCH
 #include <time.h>
 #endif // KEYPRESS_FEEDBACK_PATCH
@@ -600,11 +598,9 @@ lockscreen(Display *dpy, struct xrandr *rr, int screen)
 			#if DWM_LOGO_PATCH
 			drawlogo(dpy, lock, INIT);
 			#endif // DWM_LOGO_PATCH
-			#if ALPHA_PATCH
-			unsigned int opacity = (unsigned int)(alpha * 0xffffffff);
+			unsigned int opacity = (unsigned int)(alpha * 0xffffffffU);
 			XChangeProperty(dpy, lock->win, XInternAtom(dpy, "_NET_WM_WINDOW_OPACITY", False), XA_CARDINAL, 32, PropModeReplace, (unsigned char *)&opacity, 1L);
 			XSync(dpy, False);
-			#endif // ALPHA_PATCH
 			return lock;
 		}
 
