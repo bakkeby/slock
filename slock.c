@@ -24,9 +24,7 @@
 
 #include "patches.h"
 #include <X11/Xatom.h>
-#if KEYPRESS_FEEDBACK_PATCH
 #include <time.h>
-#endif // KEYPRESS_FEEDBACK_PATCH
 #include <X11/XKBlib.h>
 #include <X11/XF86keysym.h>
 #include <time.h>
@@ -62,9 +60,7 @@ enum {
 	#if PAMAUTH_PATCH
 	PAM,
 	#endif // PAMAUTH_PATCH
-	#if KEYPRESS_FEEDBACK_PATCH
 	BLOCKS,
-	#endif // KEYPRESS_FEEDBACK_PATCH
 	NUMCOLS
 };
 
@@ -380,11 +376,11 @@ readpw(Display *dpy, struct xrandr *rr, struct lock **locks, int nscreens,
 					explicit_bzero(&passwd, sizeof(passwd));
 					len = 0;
 				}
-				#if KEYPRESS_FEEDBACK_PATCH
-				if (blocks_enabled)
-					for (screen = 0; screen < nscreens; screen++)
+				if (enabled(KeypressFeedback)) {
+					for (screen = 0; screen < nscreens; screen++) {
 						draw_key_feedback(dpy, locks, screen);
-				#endif // KEYPRESS_FEEDBACK_PATCH
+					}
+				}
 				break;
 			}
 			color = len ? (caps ? CAPS : INPUT) : (failure || failonclear ? FAILED : INIT);
@@ -689,10 +685,8 @@ main(int argc, char **argv) {
 	create_lock_image(dpy);
 	#endif // BLUR_PIXELATED_SCREEN_PATCH | BACKGROUND_IMAGE_PATCH
 
-	#if KEYPRESS_FEEDBACK_PATCH
 	time_t t;
 	srand((unsigned) time(&t));
-	#endif // KEYPRESS_FEEDBACK_PATCH
 
 	/* check for Xrandr support */
 	rr.active = XRRQueryExtension(dpy, &rr.evbase, &rr.errbase);

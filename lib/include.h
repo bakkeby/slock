@@ -15,6 +15,4 @@
 #include "pamauth.h"
 #endif
 
-#if KEYPRESS_FEEDBACK_PATCH
 #include "keypress_feedback.h"
-#endif

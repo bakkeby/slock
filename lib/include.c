@@ -17,9 +17,7 @@
 #include "dwmlogo.c"
 #endif
 
-#if KEYPRESS_FEEDBACK_PATCH
 #include "keypress_feedback.c"
-#endif
 
 #if PAMAUTH_PATCH
 #include "pamauth.c"

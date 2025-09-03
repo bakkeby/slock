@@ -13,9 +13,7 @@ static char *def_colorname[NUMCOLS] = {
 	#if PAMAUTH_PATCH
 	[PAM] =    "#9400D3",   /* waiting for PAM */
 	#endif // PAMAUTH_PATCH
-	#if KEYPRESS_FEEDBACK_PATCH
 	[BLOCKS] = "#ffffff",   /* key feedback block */
-	#endif // KEYPRESS_FEEDBACK_PATCH
 };
 
 #if MESSAGE_PATCH || COLOR_MESSAGE_PATCH
@@ -103,18 +101,21 @@ static const int pixelSize = 10;
 static const int monitortime = 5;
 #endif // DPMS_PATCH
 
-#if KEYPRESS_FEEDBACK_PATCH
-static short int blocks_enabled = 1; // 0 = don't show blocks
-static const int blocks_width = 0; // 0 = full width
-static const int blocks_height = 16;
-
-// position
-static const int blocks_x = 0;
-static const int blocks_y = 0;
+/* Keypress feedback default settings */
+static int blocks_width = 55; // 0 = full width
+static int blocks_height = 0;
 
 // Number of blocks
-static const int blocks_count = 10;
-#endif // KEYPRESS_FEEDBACK_PATCH
+static int blocks_x_count = 100;
+static int blocks_y_count = 100;
+
+// position
+static int blocks_y_min = 0;
+static int blocks_y_max = 0;
+static int blocks_x_min = 0;
+static int blocks_x_max = 0;
+
+
 
 #if PAMAUTH_PATCH
 /* PAM service that's used for authentication */

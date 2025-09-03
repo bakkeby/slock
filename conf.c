@@ -25,6 +25,10 @@ static int config_lookup_simple_float(const config_t *cfg, const char *name, flo
 static int config_setting_lookup_simple_float(const config_setting_t *cfg, const char *name, float *floatptr);
 static int _config_setting_get_simple_float(const config_setting_t *cfg_item, float *floatptr);
 
+static int config_lookup_unsigned_int(const config_t *cfg, const char *name, unsigned int *ptr);
+static int config_setting_lookup_unsigned_int(const config_setting_t *cfg, const char *name, unsigned int *ptr);
+static int _config_setting_get_unsigned_int(const config_setting_t *cfg_item, unsigned int *ptr);
+
 static void cleanup_config(void);
 static void load_config(void);
 static void load_fallback_config(void);
@@ -147,6 +151,34 @@ _config_setting_get_simple_float(const config_setting_t *cfg_item, float *floatp
 	return 1;
 }
 
+int
+config_lookup_unsigned_int(const config_t *cfg, const char *name, unsigned int *ptr)
+{
+	return _config_setting_get_unsigned_int(config_lookup(cfg, name), ptr);
+}
+
+int
+config_setting_lookup_unsigned_int(const config_setting_t *cfg, const char *name, unsigned int *ptr)
+{
+	return _config_setting_get_unsigned_int(config_setting_lookup(cfg, name), ptr);
+}
+
+int
+_config_setting_get_unsigned_int(const config_setting_t *cfg_item, unsigned int *ptr)
+{
+	if (!cfg_item)
+		return 0;
+
+	int integer = config_setting_get_int(cfg_item);
+
+	if (integer >= 0) {
+		*ptr = (unsigned int)integer;
+		return 1;
+	}
+
+	return 1;
+}
+
 void
 load_config(void)
 {
@@ -226,6 +258,15 @@ load_misc(config_t *cfg)
 	config_lookup_sloppy_bool(cfg, "fail_on_clear", &failonclear);
 	config_lookup_float(cfg, "alpha", &alpha);
 	config_lookup_int(cfg, "quick_cancel_timeout_seconds", &timetocancel);
+
+	config_lookup_int(cfg, "blocks.height", &blocks_height);
+	config_lookup_int(cfg, "blocks.width", &blocks_width);
+	config_lookup_int(cfg, "blocks.count_x", &blocks_x_count);
+	config_lookup_int(cfg, "blocks.count_y", &blocks_y_count);
+	config_lookup_int(cfg, "blocks.min_y", &blocks_y_min);
+	config_lookup_int(cfg, "blocks.max_y", &blocks_y_max);
+	config_lookup_int(cfg, "blocks.min_x", &blocks_x_min);
+	config_lookup_int(cfg, "blocks.max_x", &blocks_x_max);
 }
 
 void
@@ -246,13 +287,11 @@ load_colors(config_t *cfg)
 	config_setting_lookup_strdup(cols, "input", &colorname[INPUT]);
 	config_setting_lookup_strdup(cols, "failed", &colorname[FAILED]);
 	config_setting_lookup_strdup(cols, "caps", &colorname[CAPS]);
+	config_setting_lookup_strdup(cols, "blocks", &colorname[BLOCKS]);
 
 	#if PAMAUTH_PATCH
 	config_setting_lookup_strdup(cols, "pam", &colorname[PAM]);
 	#endif // PAMAUTH_PATCH
-	#if KEYPRESS_FEEDBACK_PATCH
-	config_setting_lookup_strdup(cols, "blocks", &colorname[BLOCKS]);
-	#endif
 }
 
 void
