@@ -51,14 +51,6 @@
  */
 #define COLOR_MESSAGE_PATCH 0
 
-/* Adds an additional configuration parameter, controlkeyclear. When set to 1, slock will no
- * longer change to the failure color if a control key is pressed while the buffer is empty.
- * This may be useful if, for example, you wake your monitor up by pressing a control key
- * and don't want to spoil the detection of failed unlocking attempts.
- * https://tools.suckless.org/slock/patches/control-clear/
- */
-#define CONTROLCLEAR_PATCH 0
-
 /* This patch interacts with the Display Power Signaling and automatically shuts down
  * the monitor after a configurable amount of seconds.
  * The monitor will automatically be activated by pressing a key or moving the mouse

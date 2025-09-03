@@ -12,6 +12,7 @@
 #include <stdarg.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdint.h>
 #include <string.h>
 #include <unistd.h>
 #include <spawn.h>
@@ -101,7 +102,6 @@ struct secretpass {
 #endif // SECRET_PASSWORD_PATCH
 
 #include "config.def.h"
-#include "conf.c"
 
 struct lock {
 	int screen;
@@ -127,6 +127,7 @@ struct xrandr {
 };
 
 #include "lib/include.h"
+#include "conf.c"
 
 static void
 die(const char *errstr, ...)
@@ -391,10 +392,9 @@ readpw(Display *dpy, struct xrandr *rr, struct lock **locks, int nscreens,
 				break;
 			#endif // MEDIAKEYS_PATCH
 			default:
-				#if CONTROLCLEAR_PATCH
-				if (controlkeyclear && iscntrl((int)buf[0]) && !num)
+				if (enabled(ControlClear) && iscntrl((int)buf[0]) && !num)
 					continue;
-				#endif // CONTROLCLEAR_PATCH
+
 				if (num && !iscntrl((int)buf[0]) &&
 				    (len + num < sizeof(passwd)))
 				{
@@ -598,8 +598,10 @@ lockscreen(Display *dpy, struct xrandr *rr, int screen)
 			#if DWM_LOGO_PATCH
 			drawlogo(dpy, lock, INIT);
 			#endif // DWM_LOGO_PATCH
-			unsigned int opacity = (unsigned int)(alpha * 0xffffffffU);
-			XChangeProperty(dpy, lock->win, XInternAtom(dpy, "_NET_WM_WINDOW_OPACITY", False), XA_CARDINAL, 32, PropModeReplace, (unsigned char *)&opacity, 1L);
+			if (enabled(Alpha)) {
+				unsigned int opacity = (unsigned int)(alpha * 0xffffffffU);
+				XChangeProperty(dpy, lock->win, XInternAtom(dpy, "_NET_WM_WINDOW_OPACITY", False), XA_CARDINAL, 32, PropModeReplace, (unsigned char *)&opacity, 1L);
+			}
 			XSync(dpy, False);
 			return lock;
 		}

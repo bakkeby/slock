@@ -1,4 +1,6 @@
 /* Patches */
+#include "func.c"
+
 #if BACKGROUND_IMAGE_PATCH
 #include "background_image.c"
 #elif BLUR_PIXELATED_SCREEN_PATCH

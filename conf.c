@@ -8,6 +8,7 @@ static char *user = NULL;
 static char *group = NULL;
 static char **colorname = NULL;
 static ResourcePref *resources = NULL;
+uint64_t settings = 0;
 static int num_resources = 0;
 
 static void set_config_path(const char* filename, char *config_path, char *config_file);
@@ -29,6 +30,7 @@ static void load_config(void);
 static void load_fallback_config(void);
 static void load_misc(config_t *cfg);
 static void load_colors(config_t *cfg);
+static void load_functionality(config_t *cfg);
 
 static void generate_resource_strings(void);
 static void add_resource_binding(const char *string, void *ptr);
@@ -157,7 +159,7 @@ load_config(void)
 	config_set_include_dir(&cfg, config_path);
 
 	if (config_read_file(&cfg, config_file)) {
-		// load_functionality(&cfg);
+		load_functionality(&cfg);
 		load_misc(&cfg);
 		load_colors(&cfg);
 		// load_commands(&cfg);
@@ -252,6 +254,22 @@ load_colors(config_t *cfg)
 	#if KEYPRESS_FEEDBACK_PATCH
 	config_setting_lookup_strdup(cols, "blocks", &colorname[BLOCKS]);
 	#endif
+}
+
+void
+load_functionality(config_t *cfg)
+{
+	int i, enabled;
+
+	config_setting_t *func_t = config_lookup(cfg, "functionality");
+	if (!func_t)
+		return;
+
+	for (i = 0; functionality_names[i].name != NULL; i++) {
+		if (config_setting_lookup_sloppy_bool(func_t, functionality_names[i].name, &enabled)) {
+			setenabled(functionality_names[i].value, enabled);
+		}
+	}
 }
 
 void

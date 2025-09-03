@@ -100,11 +100,6 @@ static const int blurRadius = 5;
 static const int pixelSize = 10;
 #endif // BLUR_PIXELATED_SCREEN_PATCH
 
-#if CONTROLCLEAR_PATCH
-/* allow control key to trigger fail on clear */
-static const int controlkeyclear = 0;
-#endif // CONTROLCLEAR_PATCH
-
 #if DPMS_PATCH
 /* time in seconds before the monitor shuts down */
 static const int monitortime = 5;
