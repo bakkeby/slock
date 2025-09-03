@@ -261,8 +261,7 @@ readpw(Display *dpy, struct xrandr *rr, struct lock **locks, int nscreens,
 			    IsPFKey(ksym) ||
 			    IsPrivateKeypadKey(ksym))
 				continue;
-			#if TERMINALKEYS_PATCH
-			if (ev.xkey.state & ControlMask) {
+			if (enabled(TerminalKeys) && ev.xkey.state & ControlMask) {
 				switch (ksym) {
 				case XK_u:
 					ksym = XK_Escape;
@@ -278,7 +277,6 @@ readpw(Display *dpy, struct xrandr *rr, struct lock **locks, int nscreens,
 					break;
 				}
 			}
-			#endif // TERMINALKEYS_PATCH
 			switch (ksym) {
 			case XK_Return:
 				passwd[len] = '\0';
