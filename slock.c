@@ -102,7 +102,7 @@ struct secretpass {
 };
 #endif // SECRET_PASSWORD_PATCH
 
-#include "config.h"
+#include "config.def.h"
 #include "conf.c"
 
 struct lock {

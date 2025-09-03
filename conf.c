@@ -7,6 +7,8 @@ const char *progname = "slock";
 static char *user = NULL;
 static char *group = NULL;
 static char **colorname = NULL;
+static ResourcePref *resources = NULL;
+static int num_resources = 0;
 
 static void set_config_path(const char* filename, char *config_path, char *config_file);
 
@@ -23,6 +25,9 @@ static void load_config(void);
 static void load_fallback_config(void);
 static void load_misc(config_t *cfg);
 static void load_colors(config_t *cfg);
+
+static void generate_resource_strings(void);
+static void add_resource_binding(const char *string, void *ptr);
 
 void
 set_config_path(const char* filename, char *config_path, char *config_file)
@@ -143,6 +148,7 @@ load_config(void)
 	}
 
 	load_fallback_config();
+	generate_resource_strings();
 	config_destroy(&cfg);
 }
 
@@ -176,6 +182,10 @@ cleanup_config(void)
 		}
 		free(colorname);
 	}
+
+	for (i = 0; i < num_resources; i++)
+		free(resources[i].name);
+	free(resources);
 }
 
 void
@@ -214,3 +224,46 @@ load_colors(config_t *cfg)
 	config_setting_lookup_strdup(cols, "blocks", &colorname[BLOCKS]);
 	#endif
 }
+
+void
+generate_resource_strings(void)
+{
+	resources = calloc(NUMCOLS + 10, sizeof(ResourcePref));
+
+	/* Add resource strings */
+	#if DWM_LOGO_PATCH && !BLUR_PIXELATED_SCREEN_PATCH
+	add_resource_binding("background", &colorname[BACKGROUND]);
+	#endif
+
+	add_resource_binding("locked", &colorname[INIT]);
+	add_resource_binding("input", &colorname[INPUT]);
+	add_resource_binding("failed", &colorname[FAILED]);
+
+	#if CAPSCOLOR_PATCH
+	add_resource_binding("capslock", &colorname[CAPS]);
+	#endif
+
+	#if PAMAUTH_PATCH
+	add_resource_binding("pamauth", &colorname[PAM]);
+	#endif
+
+	#if MESSAGE_PATCH || COLOR_MESSAGE_PATCH
+	add_resource_binding("message", &message);
+	add_resource_binding("text_color", &text_color);
+	add_resource_binding("font_name", &font_name);
+	#endif
+
+	#if BACKGROUND_IMAGE_PATCH
+	add_resource_binding("bg_image", &def_background_image);
+	#endif
+}
+
+void
+add_resource_binding(const char *string, void *ptr)
+{
+	resources[num_resources].name = strdup(string);
+	resources[num_resources].type = STRING;
+	resources[num_resources].dst = ptr;
+	num_resources++;
+}
+

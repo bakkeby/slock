@@ -56,34 +56,6 @@ static XRectangle rectangles[] = {
 };
 #endif // DWM_LOGO_PATCH
 
-#if XRESOURCES_PATCH
-/*
- * Xresources preferences to load at startup
- */
-ResourcePref resources[] = {
-		#if DWM_LOGO_PATCH && !BLUR_PIXELATED_SCREEN_PATCH
-		{ "background",   STRING,  &def_colorname[BACKGROUND] },
-		#endif //DWM_LOGO_PATCH
-		#if BACKGROUND_IMAGE_PATCH
-		{ "bg_image",     STRING,  &def_background_image },
-		#endif // BACKGROUND_IMAGE_PATCH
-		{ "locked",       STRING,  &def_colorname[INIT] },
-		{ "input",        STRING,  &def_colorname[INPUT] },
-		{ "failed",       STRING,  &def_colorname[FAILED] },
-		#if CAPSCOLOR_PATCH
-		{ "capslock",     STRING,  &def_colorname[CAPS] },
-		#endif // CAPSCOLOR_PATCH
-		#if PAMAUTH_PATCH
-		{ "pamauth",      STRING,  &def_colorname[PAM] },
-		#endif // PAMAUTH_PATCH
-		#if MESSAGE_PATCH || COLOR_MESSAGE_PATCH
-		{ "message",      STRING,  &message },
-		{ "text_color",   STRING,  &text_color },
-		{ "font_name",    STRING,  &font_name },
-		#endif // MESSAGE_PATCH | COLOR_MESSAGE_PATCH
-};
-#endif // XRESOURCES_PATCH
-
 #if ALPHA_PATCH
 /* lock screen opacity */
 static const float alpha = 0.9;
