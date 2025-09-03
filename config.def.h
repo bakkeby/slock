@@ -121,7 +121,5 @@ static const int blocks_count = 10;
 static const char* pam_service = "login";
 #endif // PAMAUTH_PATCH
 
-#if QUICKCANCEL_PATCH
-/* time in seconds to cancel lock with mouse movement */
-static const int timetocancel = 4;
-#endif // QUICKCANCEL_PATCH
+/* time in seconds to cancel lock with mouse movement or keypress */
+static int timetocancel = 0;

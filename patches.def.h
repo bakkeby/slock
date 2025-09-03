@@ -87,14 +87,6 @@
  */
 #define PAMAUTH_PATCH 0
 
-/* Cancel slock by moving the mouse within a certain time-period after slock started.
- * The time-period can be defined in seconds with the setting timetocancel in the config.h.
- * This can be useful if you forgot to disable xautolock during an activity that requires
- * no input (e.g. reading text, watching video, etc.).
- * https://tools.suckless.org/slock/patches/quickcancel/
- */
-#define QUICKCANCEL_PATCH 0
-
 /* This patch allows for commands to be executed when the user enters special passwords.
  * https://tools.suckless.org/slock/patches/secret-password/
  */

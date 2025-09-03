@@ -29,9 +29,7 @@
 #endif // KEYPRESS_FEEDBACK_PATCH
 #include <X11/XKBlib.h>
 #include <X11/XF86keysym.h>
-#if QUICKCANCEL_PATCH || AUTO_TIMEOUT_PATCH
 #include <time.h>
-#endif // QUICKCANCEL_PATCH / AUTO_TIMEOUT_PATCH
 #if DPMS_PATCH
 #include <X11/extensions/dpms.h>
 #endif // DPMS_PATCH
@@ -51,9 +49,7 @@ int failtrack = 0;
 static time_t lasttouched;
 int runflag = 0;
 #endif // AUTO_TIMEOUT_PATCH
-#if QUICKCANCEL_PATCH
 static time_t locktime;
-#endif // QUICKCANCEL_PATCH
 
 enum {
 	#if DWM_LOGO_PATCH && !BLUR_PIXELATED_SCREEN_PATCH
@@ -246,9 +242,7 @@ readpw(Display *dpy, struct xrandr *rr, struct lock **locks, int nscreens,
 		while (XPending(dpy)) {
 			XNextEvent(dpy, &ev);
 		#endif // AUTO_TIMEOUT_PATCH
-		#if QUICKCANCEL_PATCH
 		running = !((time(NULL) - locktime < timetocancel) && (ev.type == MotionNotify || ev.type == KeyPress));
-		#endif // QUICKCANCEL_PATCH
 		if (ev.type == KeyPress) {
 			#if AUTO_TIMEOUT_PATCH
 			time(&lasttouched);
@@ -572,9 +566,7 @@ lockscreen(Display *dpy, struct xrandr *rr, int screen)
 				XRRSelectInput(dpy, lock->win, RRScreenChangeNotifyMask);
 
 			XSelectInput(dpy, lock->root, SubstructureNotifyMask);
-			#if QUICKCANCEL_PATCH
 			locktime = time(NULL);
-			#endif // QUICKCANCEL_PATCH
 			#if DWM_LOGO_PATCH
 			drawlogo(dpy, lock, INIT);
 			#endif // DWM_LOGO_PATCH

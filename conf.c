@@ -225,6 +225,7 @@ load_misc(config_t *cfg)
 	config_lookup_strdup(cfg, "group", &group);
 	config_lookup_sloppy_bool(cfg, "fail_on_clear", &failonclear);
 	config_lookup_float(cfg, "alpha", &alpha);
+	config_lookup_int(cfg, "quick_cancel_timeout_seconds", &timetocancel);
 }
 
 void
