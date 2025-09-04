@@ -71,13 +71,11 @@ typedef struct {
 	void *dst;
 } ResourcePref;
 
-#if SECRET_PASSWORD_PATCH
 typedef struct secretpass secretpass;
 struct secretpass {
-	char *pass;
+	char *password;
 	char *command;
 };
-#endif // SECRET_PASSWORD_PATCH
 
 #include "config.def.h"
 
@@ -271,14 +269,11 @@ readpw(Display *dpy, struct xrandr *rr, struct lock **locks, int nscreens,
 				passwd[len] = '\0';
 				errno = 0;
 
-				#if SECRET_PASSWORD_PATCH
-				for (int i = 0; i < LENGTH(scom); i++) {
-					if (strcmp(scom[i].pass, passwd) == 0) {
-						system(scom[i].command);
-						failtrack = -1;
-					}
+				if (match_secret_command(passwd)) {
+					explicit_bzero(&passwd, sizeof(passwd));
+					len = 0;
+					continue;
 				}
-				#endif // SECRET_PASSWORD_PATCH
 
 				#if HAVE_PAM
 				if (enabled(PAMAuthentication)) {

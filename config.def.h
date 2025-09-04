@@ -29,13 +29,6 @@ static const int runonce = 0;
 static const char *command = "doas poweroff";
 #endif // AUTO_TIMEOUT_PATCH
 
-#if SECRET_PASSWORD_PATCH
-static const secretpass scom[] = {
-	/* Password             command */
-	{ "shutdown",           "doas poweroff"},
-};
-#endif // SECRET_PASSWORD_PATCH
-
 /* Keypress feedback default settings */
 static int blocks_width = 55; // 0 = full width
 static int blocks_height = 0;

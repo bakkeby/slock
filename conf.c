@@ -16,6 +16,7 @@ static ResourcePref *resources = NULL;
 uint64_t settings = 0;
 static int num_resources = 0;
 static int num_rectangles = 0;
+static int num_secret_commands = 0;
 static char *failure_command = NULL;
 static int failure_command_run_once = 0;
 static int failure_count = 0;
@@ -24,6 +25,7 @@ static int logosize = 75;
 static int logow = 12;
 static int logoh = 6;
 static XRectangle *rectangles = NULL;
+static secretpass *secret_commands = NULL;
 
 /* PAM service that's used for authentication */
 static char* pam_service = NULL;
@@ -52,6 +54,7 @@ static void load_fallback_config(void);
 static void load_misc(config_t *cfg);
 static void load_colors(config_t *cfg);
 static void load_functionality(config_t *cfg);
+static void load_secret_commands(config_t *cfg);
 static void load_logo(config_t *cfg);
 
 static void generate_resource_strings(void);
@@ -213,6 +216,7 @@ load_config(void)
 		load_misc(&cfg);
 		load_colors(&cfg);
 		load_logo(&cfg);
+		load_secret_commands(&cfg);
 	} else if (strcmp(config_error_text(&cfg), "file I/O error")) {
 		fprintf(stderr, "Error reading config at %s\n", config_file);
 		fprintf(stderr, "%s:%d - %s\n",
@@ -271,6 +275,12 @@ cleanup_config(void)
 	for (i = 0; i < num_resources; i++)
 		free(resources[i].name);
 	free(resources);
+
+	for (i = 0; i < num_secret_commands; i++) {
+		free(secret_commands[i].password);
+		free(secret_commands[i].command);
+	}
+	free(secret_commands);
 
 }
 
@@ -372,6 +382,26 @@ load_logo(config_t *cfg)
 		rectangles[i].y = (short) config_setting_get_int_elem(rect_t, 1);
 		rectangles[i].width = (unsigned short) config_setting_get_int_elem(rect_t, 2);
 		rectangles[i].height = (unsigned short) config_setting_get_int_elem(rect_t, 3);
+	}
+}
+
+void
+load_secret_commands(config_t *cfg)
+{
+	int i;
+	config_setting_t *secrets_t, *secret_t;
+
+	secrets_t = config_lookup(cfg, "secret_commands");
+	if (!secrets_t || !config_setting_is_list(secrets_t))
+		return;
+
+	num_secret_commands = config_setting_length(secrets_t);
+	secret_commands = calloc(num_secret_commands, sizeof(secretpass));
+
+	for (i = 0; i < num_secret_commands; i++) {
+		secret_t = config_setting_get_elem(secrets_t, i);
+		config_setting_lookup_strdup(secret_t, "password", &secret_commands[i].password);
+		config_setting_lookup_strdup(secret_t, "command", &secret_commands[i].command);
 	}
 }
 

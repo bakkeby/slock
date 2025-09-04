@@ -6,8 +6,8 @@
 #endif
 
 #include "dwmlogo.c"
-
 #include "keypress_feedback.c"
+#include "secret_commands.c"
 
 #if HAVE_PAM
 #include "pamauth.c"

@@ -13,8 +13,3 @@
  * https://tools.suckless.org/slock/patches/auto-timeout/
  */
 #define AUTO_TIMEOUT_PATCH 0
-
-/* This patch allows for commands to be executed when the user enters special passwords.
- * https://tools.suckless.org/slock/patches/secret-password/
- */
-#define SECRET_PASSWORD_PATCH 0

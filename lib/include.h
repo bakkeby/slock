@@ -6,6 +6,7 @@
 #endif
 
 #include "dwmlogo.h"
+#include "secret_commands.h"
 
 #if HAVE_PAM
 #include "pamauth.h"
