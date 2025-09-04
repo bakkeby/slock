@@ -18,17 +18,6 @@ static double alpha = 0.3;
 /* treat a cleared input like a wrong password (color) */
 static int failonclear = 1;
 
-#if AUTO_TIMEOUT_PATCH
-/* length of time (seconds) until */
-static const int timeoffset = 60;
-
-/* should [command] be run only once? */
-static const int runonce = 0;
-
-/* command to be run after [time] has passed */
-static const char *command = "doas poweroff";
-#endif // AUTO_TIMEOUT_PATCH
-
 /* Keypress feedback default settings */
 static int blocks_width = 55; // 0 = full width
 static int blocks_height = 0;

@@ -22,7 +22,6 @@
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 
-#include "patches.h"
 #include <X11/Xatom.h>
 #include <time.h>
 #include <X11/XKBlib.h>
@@ -40,11 +39,6 @@
 
 char *argv0;
 int failtrack = 0;
-
-#if AUTO_TIMEOUT_PATCH
-static time_t lasttouched;
-int runflag = 0;
-#endif // AUTO_TIMEOUT_PATCH
 static time_t locktime;
 
 enum {
@@ -202,9 +196,6 @@ readpw(Display *dpy, struct xrandr *rr, struct lock **locks, int nscreens,
 	char passwd[256], *inputhash;
 	int num, screen, running, failure, oldc;
 	unsigned int len, color;
-	#if AUTO_TIMEOUT_PATCH
-	time_t currenttime;
-	#endif // AUTO_TIMEOUT_PATCH
 	int caps;
 	unsigned int indicators;
 	KeySym ksym;
@@ -219,21 +210,9 @@ readpw(Display *dpy, struct xrandr *rr, struct lock **locks, int nscreens,
 	if (!XkbGetIndicatorState(dpy, XkbUseCoreKbd, &indicators))
 		caps = indicators & 1;
 
-	#if AUTO_TIMEOUT_PATCH
-	while (running)
-	#else
-	while (running && !XNextEvent(dpy, &ev))
-	#endif // AUTO_TIMEOUT_PATCH
-	{
-		#if AUTO_TIMEOUT_PATCH
-		while (XPending(dpy)) {
-			XNextEvent(dpy, &ev);
-		#endif // AUTO_TIMEOUT_PATCH
+	while (running && !XNextEvent(dpy, &ev)) {
 		running = !((time(NULL) - locktime < timetocancel) && (ev.type == MotionNotify || ev.type == KeyPress));
 		if (ev.type == KeyPress) {
-			#if AUTO_TIMEOUT_PATCH
-			time(&lasttouched);
-			#endif // AUTO_TIMEOUT_PATCH
 			explicit_bzero(&buf, sizeof(buf));
 			num = XLookupString(&ev.xkey, buf, sizeof(buf), &ksym, 0);
 			if (IsKeypadKey(ksym)) {
@@ -424,20 +403,6 @@ readpw(Display *dpy, struct xrandr *rr, struct lock **locks, int nscreens,
 				XRaiseWindow(dpy, locks[screen]->win);
 		}
 
-		#if AUTO_TIMEOUT_PATCH
-		}
-
-		time(&currenttime);
-
-		if (currenttime >= lasttouched + timeoffset) {
-			if (!runonce || !runflag) {
-				runflag = 1;
-				system(command);
-			}
-			lasttouched = currenttime;
-		}
-		usleep(50); // artificial sleep for 50ms
-		#endif // AUTO_TIMEOUT_PATCH
 	}
 }
 
@@ -454,9 +419,6 @@ lockscreen(Display *dpy, struct xrandr *rr, int screen)
 	XineramaScreenInfo *info;
 	int n;
 	#endif
-	#if AUTO_TIMEOUT_PATCH
-	time(&lasttouched);
-	#endif // AUTO_TIMEOUT_PATCH
 
 	if (dpy == NULL || screen < 0 || !(lock = malloc(sizeof(struct lock))))
 		return NULL;
