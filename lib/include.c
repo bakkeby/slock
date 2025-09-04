@@ -5,7 +5,7 @@
 #include "background_image.c"
 #endif
 
-#include "dwmlogo.c"
+#include "logo.c"
 #include "keypress_feedback.c"
 #include "secret_commands.c"
 

@@ -392,8 +392,6 @@ load_logo(config_t *cfg)
 	config_setting_t *rectangles_t, *rect_t;
 
 	config_lookup_int(cfg, "logo.size", &logosize);
-	config_lookup_int(cfg, "logo.width", &logow);
-	config_lookup_int(cfg, "logo.height", &logoh);
 
 	rectangles_t = config_lookup(cfg, "logo.rectangles");
 	if (!rectangles_t || !config_setting_is_list(rectangles_t))
@@ -413,6 +411,9 @@ load_logo(config_t *cfg)
 		rectangles[i].y = (short) config_setting_get_int_elem(rect_t, 1);
 		rectangles[i].width = (unsigned short) config_setting_get_int_elem(rect_t, 2);
 		rectangles[i].height = (unsigned short) config_setting_get_int_elem(rect_t, 3);
+
+		logow = MAX(logow, rectangles[i].x + rectangles[i].width);
+		logoh = MAX(logoh, rectangles[i].y + rectangles[i].height);
 	}
 }
 

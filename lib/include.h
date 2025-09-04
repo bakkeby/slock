@@ -5,7 +5,7 @@
 #include "background_image.h"
 #endif
 
-#include "dwmlogo.h"
+#include "logo.h"
 #include "secret_commands.h"
 
 #if HAVE_PAM
