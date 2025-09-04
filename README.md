@@ -1,48 +1,20 @@
-Similar to [dwm-flexipatch](https://github.com/bakkeby/dwm-flexipatch) this slock 1.6 (3791a99,
-2025-08-16) project has a different take on patching. It uses preprocessor directives to decide
-whether or not to include a patch during build time. Essentially this means that this build, for
-better or worse, contains both the patched _and_ the original code. The aim being that you can
-select which patches to include and the build will contain that code and nothing more.
+This is a version of st that is built on [slock-flexipatch](https://github.com/bakkeby/slock-flexipatch) and the main difference between this and other builds of slock is that this one comes with runtime configuration.
 
-For example to include the `capscolor` patch then you would only need to flip this setting from 0
-to 1 in [patches.h](https://github.com/bakkeby/slock-flexipatch/blob/master/patches.h):
-```c
-#define CAPSCOLOR_PATCH 1
-```
+That means that slock can be reconfigured without having to recompile it.
 
-Once you have found out what works for you and what doesn't then you should be in a better position
-to choose patches should you want to start patching from scratch.
-
-Alternatively if you have found the patches you want, but don't want the rest of the flexipatch
-entanglement on your plate then you may want to have a look at
-[flexipatch-finalizer](https://github.com/bakkeby/flexipatch-finalizer); a custom pre-processor
-tool that removes all the unused flexipatch code leaving you with a build that contains the patches
-you selected.
+After compiling copy the `slock.cfg` file from the project directory to `~/.config/slock/` or the XDG config home equivalent if you are using that.
 
 Refer to [https://tools.suckless.org/slock/](https://tools.suckless.org/slock/) for details on the
 slock tool, how to install it and how it works.
 
 ---
 
-### Changelog:
+### Notable additions to st (beyond patches)
 
-2022-03-28 - Added the background image patch
+   - runtime configuration
+   - exit command (run a command after entering a valid password)
 
-2021-09-13 - Added the dwm logo patch
-
-2021-09-09 - Added the auto-timeout, failure-command and secret-password patches
-
-2021-06-08 - Added the color message patch
-
-2020-08-03 - Added alpha, keypress_feedback and blur_pixelated_screen patches
-
-2019-11-27 - Added xresources patch
-
-2019-10-17 - Added capscolor, control clear, dpms, mediakeys, message, pam auth, quickcancel patches
-
-2019-10-16 - Introduced [flexipatch-finalizer](https://github.com/bakkeby/flexipatch-finalizer)
-
-### Patches included:
+### Patches incorporated:
 
    - [alpha](https://github.com/khuedoan/slock)
       - enables transparency for slock
@@ -59,10 +31,6 @@ slock tool, how to install it and how it works.
 
    - [capscolor](https://tools.suckless.org/slock/patches/capscolor/)
       - adds an additional color to indicate the state of Caps Lock
-
-   - [color-message](https://tools.suckless.org/slock/patches/colormessage/)
-      - based on the message patch this patch lets you add a message to your lock screen using
-        24-bit color ANSI escape codes
 
    - [control-clear](https://tools.suckless.org/slock/patches/control-clear/)
       - with this patch slock will no longer change to the failure color if a control key is pressed
@@ -89,15 +57,11 @@ slock tool, how to install it and how it works.
       - allows media keys to be used while the screen is locked, e.g. adjust volume or skip to the
         next song without having to unlock the screen first
 
-   - [message](https://tools.suckless.org/slock/patches/message/)
-      - this patch lets you add a custom message to your lock screen
-
    - [pam-auth](https://tools.suckless.org/slock/patches/pam_auth/)
       - replaces shadow support with PAM authentication support
 
    - [quickcancel](https://tools.suckless.org/slock/patches/quickcancel/)
       - cancel slock by moving the mouse within a certain time-period after slock started
-      - the time-period can be defined in seconds with the setting timetocancel in the config.h
       - this can be useful if you forgot to disable xautolock during an activity that requires no
         input (e.g. reading text, watching video, etc.)
 

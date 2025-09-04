@@ -447,7 +447,7 @@ load_auto_timeout(config_t *cfg)
 void
 generate_resource_strings(void)
 {
-	resources = calloc(NUMCOLS + 10, sizeof(ResourcePref));
+	resources = calloc(NUMCOLS, sizeof(ResourcePref));
 
 	/* Add resource strings */
 	add_resource_binding("background", &colorname[BACKGROUND]);
@@ -455,6 +455,7 @@ generate_resource_strings(void)
 	add_resource_binding("input", &colorname[INPUT]);
 	add_resource_binding("failed", &colorname[FAILED]);
 	add_resource_binding("capslock", &colorname[CAPS]);
+	add_resource_binding("blocks", &colorname[BLOCKS]);
 
 	#if HAVE_PAM
 	add_resource_binding("pamauth", &colorname[PAM]);
