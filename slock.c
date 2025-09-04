@@ -610,7 +610,9 @@ main(int argc, char **argv) {
 	if (setuid(duid) < 0)
 		die("slock: setuid: %s\n", strerror(errno));
 
-	xrdb_init(dpy);
+	if (enabled(Xresources)) {
+		xrdb_init(dpy);
+	}
 
 	#if HAVE_IMLIB
 	if (enabled(BackgroundImage)) {
