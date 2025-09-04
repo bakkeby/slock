@@ -46,7 +46,6 @@ enum {
 	INPUT,
 	FAILED,
 	CAPS,
-	LOGO,
 	PAM,
 	BLOCKS,
 	NUMCOLS
