@@ -37,7 +37,6 @@ draw_key_feedback(Display *dpy, struct lock **locks, int screen)
 	x = blocks_x_min + x_position*block_width;
 	y = blocks_y_min + y_position*block_height;
 
-	XClearWindow(dpy, win);
 	XFillRectangle(dpy, win, gc, x, y, width, height);
 
 	XFreeGC(dpy, gc);

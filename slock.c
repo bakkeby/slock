@@ -48,9 +48,7 @@ int runflag = 0;
 static time_t locktime;
 
 enum {
-	#if DWM_LOGO_PATCH && !BLUR_PIXELATED_SCREEN_PATCH
 	BACKGROUND,
-	#endif // DWM_LOGO_PATCH
 	INIT,
 	INPUT,
 	FAILED,
@@ -91,13 +89,11 @@ struct lock {
 	Pixmap bgmap;
 	#endif
 	unsigned long colors[NUMCOLS];
-	#if DWM_LOGO_PATCH
 	unsigned int x, y;
 	unsigned int xoff, yoff, mw, mh;
 	Drawable drawable;
 	GC gc;
-	XRectangle rectangles[LENGTH(rectangles)];
-	#endif // DWM_LOGO_PATCH
+	XRectangle *rectangles;
 };
 
 struct xrandr {
@@ -289,16 +285,21 @@ readpw(Display *dpy, struct xrandr *rr, struct lock **locks, int nscreens,
 					retval = pam_start(pam_service, hash, &pamc, &pamh);
 					color = PAM;
 					for (screen = 0; screen < nscreens; screen++) {
-						#if DWM_LOGO_PATCH
-						drawlogo(dpy, locks[screen], color);
-						#elif HAVE_IMLIB
-						if (locks[screen]->bgmap)
+						#if HAVE_IMLIB
+						if (locks[screen]->bgmap) {
 							XSetWindowBackgroundPixmap(dpy, locks[screen]->win, locks[screen]->bgmap);
-						else
+						} else {
 							XSetWindowBackground(dpy, locks[screen]->win, locks[screen]->colors[0]);
+						}
+						if (enabled(ShowLogo)) {
+							drawlogo(dpy, locks[screen], color);
+						}
 						XClearWindow(dpy, locks[screen]->win);
 						#else
 						XSetWindowBackground(dpy, locks[screen]->win, locks[screen]->colors[color]);
+						if (enabled(ShowLogo)) {
+							drawlogo(dpy, locks[screen], color);
+						}
 						XClearWindow(dpy, locks[screen]->win);
 						XRaiseWindow(dpy, locks[screen]->win);
 						#endif // BLUR_PIXELATED_SCREEN_PATCH
@@ -387,18 +388,21 @@ readpw(Display *dpy, struct xrandr *rr, struct lock **locks, int nscreens,
 			color = len ? (caps ? CAPS : INPUT) : (failure || failonclear ? FAILED : INIT);
 			if (running && oldc != color) {
 				for (screen = 0; screen < nscreens; screen++) {
-					#if DWM_LOGO_PATCH
-					drawlogo(dpy, locks[screen], color);
-					#elif HAVE_IMLIB
-					if (locks[screen]->bgmap)
+					#if HAVE_IMLIB
+					if (locks[screen]->bgmap) {
 						XSetWindowBackgroundPixmap(dpy, locks[screen]->win, locks[screen]->bgmap);
-					else
+					} else {
 						XSetWindowBackground(dpy, locks[screen]->win, locks[screen]->colors[color]);
+					}
+					if (enabled(ShowLogo)) {
+						drawlogo(dpy, locks[screen], color);
+					}
 					XClearWindow(dpy, locks[screen]->win);
 					#else
-					XSetWindowBackground(dpy,
-					                     locks[screen]->win,
-					                     locks[screen]->colors[color]);
+					XSetWindowBackground(dpy, locks[screen]->win, locks[screen]->colors[color]);
+					if (enabled(ShowLogo)) {
+						drawlogo(dpy, locks[screen], color);
+					}
 					XClearWindow(dpy, locks[screen]->win);
 					#endif // BLUR_PIXELATED_SCREEN_PATCH
 				}
@@ -450,12 +454,10 @@ lockscreen(Display *dpy, struct xrandr *rr, int screen)
 	XColor color, dummy;
 	XSetWindowAttributes wa;
 	Cursor invisible;
-	#if DWM_LOGO_PATCH
 	#ifdef XINERAMA
 	XineramaScreenInfo *info;
 	int n;
 	#endif
-	#endif // DWM_LOGO_PATCH
 	#if AUTO_TIMEOUT_PATCH
 	time(&lasttouched);
 	#endif // AUTO_TIMEOUT_PATCH
@@ -478,43 +480,33 @@ lockscreen(Display *dpy, struct xrandr *rr, int screen)
 		lock->colors[i] = color.pixel;
 	}
 
-	#if DWM_LOGO_PATCH
 	lock->x = DisplayWidth(dpy, lock->screen);
 	lock->y = DisplayHeight(dpy, lock->screen);
-	#ifdef XINERAMA
-	if ((info = XineramaQueryScreens(dpy, &n))) {
-		lock->xoff = info[0].x_org;
-		lock->yoff = info[0].y_org;
-		lock->mw = info[0].width;
-		lock->mh = info[0].height;
-	} else
-	#endif // XINERAMA
-	{
-		lock->xoff = lock->yoff = 0;
-		lock->mw = lock->x;
-		lock->mh = lock->y;
+	if (enabled(ShowLogo)) {
+		#ifdef XINERAMA
+		if ((info = XineramaQueryScreens(dpy, &n))) {
+			lock->xoff = info[0].x_org;
+			lock->yoff = info[0].y_org;
+			lock->mw = info[0].width;
+			lock->mh = info[0].height;
+		} else
+		#endif // XINERAMA
+		{
+			lock->xoff = lock->yoff = 0;
+			lock->mw = lock->x;
+			lock->mh = lock->y;
+		}
+		lock->drawable = XCreatePixmap(dpy, lock->root, lock->x, lock->y, DefaultDepth(dpy, screen));
+		lock->gc = XCreateGC(dpy, lock->root, 0, NULL);
+		XSetLineAttributes(dpy, lock->gc, 1, LineSolid, CapButt, JoinMiter);
 	}
-	lock->drawable = XCreatePixmap(dpy, lock->root, lock->x, lock->y, DefaultDepth(dpy, screen));
-	lock->gc = XCreateGC(dpy, lock->root, 0, NULL);
-	XSetLineAttributes(dpy, lock->gc, 1, LineSolid, CapButt, JoinMiter);
-	#endif // DWM_LOGO_PATCH
 
 	/* init */
 	wa.override_redirect = 1;
-	#if DWM_LOGO_PATCH && BLUR_PIXELATED_SCREEN_PATCH
-	#elif DWM_LOGO_PATCH
-	wa.background_pixel = lock->colors[BACKGROUND];
-	#else
-	wa.background_pixel = lock->colors[INIT];
-	#endif // DWM_LOGO_PATCH
+	wa.background_pixel = lock->colors[enabled(ShowLogo) ? BACKGROUND : INIT];
 	lock->win = XCreateWindow(dpy, lock->root, 0, 0,
-	                          #if DWM_LOGO_PATCH
 	                          lock->x,
 	                          lock->y,
-	                          #else
-	                          DisplayWidth(dpy, lock->screen),
-	                          DisplayHeight(dpy, lock->screen),
-	                          #endif // DWM_LOGO_PATCH
 	                          0, DefaultDepth(dpy, lock->screen),
 	                          CopyFromParent,
 	                          DefaultVisual(dpy, lock->screen),
@@ -529,9 +521,9 @@ lockscreen(Display *dpy, struct xrandr *rr, int screen)
 	                                &color, &color, 0, 0);
 	XDefineCursor(dpy, lock->win, invisible);
 
-	#if DWM_LOGO_PATCH
-	resizerectangles(lock);
-	#endif // DWM_LOGO_PATCH
+	if (enabled(ShowLogo)) {
+		resizerectangles(lock);
+	}
 
 	/* Try to grab mouse pointer *and* keyboard for 600ms, else fail the lock */
 	for (i = 0, ptgrab = kbgrab = -1; i < 6; i++) {
@@ -562,9 +554,9 @@ lockscreen(Display *dpy, struct xrandr *rr, int screen)
 
 			XSelectInput(dpy, lock->root, SubstructureNotifyMask);
 			locktime = time(NULL);
-			#if DWM_LOGO_PATCH
-			drawlogo(dpy, lock, INIT);
-			#endif // DWM_LOGO_PATCH
+			if (enabled(ShowLogo)) {
+				drawlogo(dpy, lock, INIT);
+			}
 			if (enabled(Alpha)) {
 				unsigned int opacity = (unsigned int)(alpha * 0xffffffffU);
 				XChangeProperty(dpy, lock->win, XInternAtom(dpy, "_NET_WM_WINDOW_OPACITY", False), XA_CARDINAL, 32, PropModeReplace, (unsigned char *)&opacity, 1L);
@@ -728,15 +720,16 @@ main(int argc, char **argv) {
 	}
 	#endif // HAVE_DPMS
 
-	#if DWM_LOGO_PATCH
-	for (nlocks = 0, s = 0; s < nscreens; s++) {
-		XFreePixmap(dpy, locks[s]->drawable);
-		XFreeGC(dpy, locks[s]->gc);
+	if (enabled(ShowLogo)) {
+		for (nlocks = 0, s = 0; s < nscreens; s++) {
+			XFreePixmap(dpy, locks[s]->drawable);
+			XFreeGC(dpy, locks[s]->gc);
+			free(locks[s]->rectangles);
+		}
 	}
 
 	XSync(dpy, 0);
 	XCloseDisplay(dpy);
-	#endif // DWM_LOGO_PATCH
 
 	cleanup_config();
 

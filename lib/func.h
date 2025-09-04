@@ -7,7 +7,7 @@ static const uint64_t
 	TurnMonitorOff = 0x20,
 	PAMAuthentication = 0x40,
 	BackgroundImage = 0x80,
-	FuncPlaceholder0x100 = 0x100,
+	ShowLogo = 0x100,
 	FuncPlaceholder0x200 = 0x200,
 	FuncPlaceholder0x400 = 0x400,
 	FuncPlaceholder0x800 = 0x800,
@@ -80,6 +80,7 @@ static const struct nv functionality_names[] = {
 	map(PAMAuthentication),
 	map(TerminalKeys),
 	map(TurnMonitorOff),
+	map(ShowLogo),
 	map(Xresources),
 	{ NULL, 0 }
 };

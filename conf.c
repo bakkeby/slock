@@ -15,10 +15,15 @@ static int background_blur_radius = 0;
 static ResourcePref *resources = NULL;
 uint64_t settings = 0;
 static int num_resources = 0;
+static int num_rectangles = 0;
 static char *failure_command = NULL;
 static int failure_command_run_once = 0;
 static int failure_count = 0;
 static int dpms_timeout = 0;
+static int logosize = 75;
+static int logow = 12;
+static int logoh = 6;
+static XRectangle *rectangles = NULL;
 
 /* PAM service that's used for authentication */
 static char* pam_service = NULL;
@@ -47,6 +52,7 @@ static void load_fallback_config(void);
 static void load_misc(config_t *cfg);
 static void load_colors(config_t *cfg);
 static void load_functionality(config_t *cfg);
+static void load_logo(config_t *cfg);
 
 static void generate_resource_strings(void);
 static void add_resource_binding(const char *string, void *ptr);
@@ -206,6 +212,7 @@ load_config(void)
 		load_functionality(&cfg);
 		load_misc(&cfg);
 		load_colors(&cfg);
+		load_logo(&cfg);
 	} else if (strcmp(config_error_text(&cfg), "file I/O error")) {
 		fprintf(stderr, "Error reading config at %s\n", config_file);
 		fprintf(stderr, "%s:%d - %s\n",
@@ -237,6 +244,10 @@ load_fallback_config(void)
 
 	if (!pam_service) {
 		disablefunc(PAMAuthentication);
+	}
+
+	if (!rectangles) {
+		disablefunc(ShowLogo);
 	}
 }
 
@@ -308,9 +319,7 @@ load_colors(config_t *cfg)
 
 	colorname = calloc(NUMCOLS, sizeof(char *));
 
-	#if DWM_LOGO_PATCH && !BLUR_PIXELATED_SCREEN_PATCH
 	config_setting_lookup_strdup(cols, "background", &colorname[BACKGROUND]);
-	#endif
 	config_setting_lookup_strdup(cols, "init", &colorname[INIT]);
 	config_setting_lookup_strdup(cols, "input", &colorname[INPUT]);
 	config_setting_lookup_strdup(cols, "failed", &colorname[FAILED]);
@@ -336,21 +345,49 @@ load_functionality(config_t *cfg)
 }
 
 void
+load_logo(config_t *cfg)
+{
+	int i;
+	config_setting_t *rectangles_t, *rect_t;
+
+	config_lookup_int(cfg, "logo.size", &logosize);
+	config_lookup_int(cfg, "logo.width", &logow);
+	config_lookup_int(cfg, "logo.height", &logoh);
+
+	rectangles_t = config_lookup(cfg, "logo.rectangles");
+	if (!rectangles_t || !config_setting_is_list(rectangles_t))
+		return;
+
+	num_rectangles = config_setting_length(rectangles_t);
+	rectangles = calloc(num_rectangles, sizeof(XRectangle));
+
+	for (i = 0; i < num_rectangles; i++) {
+		rect_t = config_setting_get_elem(rectangles_t, i);
+		if (!rect_t || config_setting_length(rect_t) != 4) {
+			fprintf(stderr, "logo: invalid rectangle at index %d\n", i);
+			continue;
+		}
+
+		rectangles[i].x = (short) config_setting_get_int_elem(rect_t, 0);
+		rectangles[i].y = (short) config_setting_get_int_elem(rect_t, 1);
+		rectangles[i].width = (unsigned short) config_setting_get_int_elem(rect_t, 2);
+		rectangles[i].height = (unsigned short) config_setting_get_int_elem(rect_t, 3);
+	}
+}
+
+void
 generate_resource_strings(void)
 {
 	resources = calloc(NUMCOLS + 10, sizeof(ResourcePref));
 
 	/* Add resource strings */
-	#if DWM_LOGO_PATCH && !BLUR_PIXELATED_SCREEN_PATCH
 	add_resource_binding("background", &colorname[BACKGROUND]);
-	#endif
-
 	add_resource_binding("locked", &colorname[INIT]);
 	add_resource_binding("input", &colorname[INPUT]);
 	add_resource_binding("failed", &colorname[FAILED]);
 	add_resource_binding("capslock", &colorname[CAPS]);
 
-	#if PAMAUTH_PATCH
+	#if HAVE_PAM
 	add_resource_binding("pamauth", &colorname[PAM]);
 	#endif
 }

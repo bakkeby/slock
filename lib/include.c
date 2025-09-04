@@ -5,9 +5,7 @@
 #include "background_image.c"
 #endif
 
-#if DWM_LOGO_PATCH
 #include "dwmlogo.c"
-#endif
 
 #include "keypress_feedback.c"
 

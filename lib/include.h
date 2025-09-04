@@ -5,9 +5,7 @@
 #include "background_image.h"
 #endif
 
-#if DWM_LOGO_PATCH
 #include "dwmlogo.h"
-#endif
 
 #if HAVE_PAM
 #include "pamauth.h"

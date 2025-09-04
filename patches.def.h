@@ -14,11 +14,6 @@
  */
 #define AUTO_TIMEOUT_PATCH 0
 
-/* This patch draws the dwm logo which changes color based on the state.
- * https://tools.suckless.org/slock/patches/dwmlogo/
- */
-#define DWM_LOGO_PATCH 0
-
 /* This patch allows for commands to be executed when the user enters special passwords.
  * https://tools.suckless.org/slock/patches/secret-password/
  */
