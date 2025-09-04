@@ -275,8 +275,16 @@ readpw(Display *dpy, struct xrandr *rr, struct lock **locks, int nscreens,
 					continue;
 				}
 
+				if (disabled(PAMAuthentication)) {
+					/* Default shadow support */
+					if (!(inputhash = crypt(passwd, hash))) {
+						fprintf(stderr, "slock: crypt: %s\n", strerror(errno));
+					} else {
+						running = !!strcmp(inputhash, hash);
+					}
+				}
 				#if HAVE_PAM
-				if (enabled(PAMAuthentication)) {
+				else {
 					retval = pam_start(pam_service, hash, &pamc, &pamh);
 					color = PAM;
 					for (screen = 0; screen < nscreens; screen++) {
@@ -313,13 +321,6 @@ readpw(Display *dpy, struct xrandr *rr, struct lock **locks, int nscreens,
 					else
 						fprintf(stderr, "slock: %s\n", pam_strerror(pamh, retval));
 					pam_end(pamh, retval);
-				} else {
-				#endif
-					if (!(inputhash = crypt(passwd, hash)))
-						fprintf(stderr, "slock: crypt: %s\n", strerror(errno));
-					else
-						running = !!strcmp(inputhash, hash);
-				#if HAVE_PAM
 				}
 				#endif
 
