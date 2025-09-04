@@ -9,8 +9,8 @@ static const uint64_t
 	BackgroundImage = 0x80,
 	ShowLogo = 0x100,
 	UnlockedScreen = 0x200,
-	FuncPlaceholder0x400 = 0x400,
-	FuncPlaceholder0x800 = 0x800,
+	AutoTimeout = 0x400,
+	ExitCommand = 0x800,
 	FuncPlaceholder0x1000 = 0x1000,
 	FuncPlaceholder0x2000 = 0x2000,
 	FuncPlaceholder0x4000 = 0x4000,
@@ -73,8 +73,10 @@ struct nv {
 
 static const struct nv functionality_names[] = {
 	map(Alpha),
+	map(AutoTimeout),
 	map(BackgroundImage),
 	map(ControlClear),
+	map(ExitCommand),
 	map(KeypressFeedback),
 	map(MediaKeys),
 	map(PAMAuthentication),

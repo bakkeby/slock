@@ -26,6 +26,20 @@ static int logow = 12;
 static int logoh = 6;
 static XRectangle *rectangles = NULL;
 static secretpass *secret_commands = NULL;
+static int auto_timeout_run_once = 0;
+static int auto_timeout_offset = 0;
+static char *auto_timeout_command = NULL;
+static char *exit_command = NULL;
+static int blocks_width = 0;
+static int blocks_height = 0;
+static int blocks_x_count = 0;
+static int blocks_y_count = 0;
+static int blocks_y_min = 0;
+static int blocks_y_max = 0;
+static int blocks_x_min = 0;
+static int blocks_x_max = 0;
+static int timetocancel = 0;
+static double alpha = 1.0;
 
 /* PAM service that's used for authentication */
 static char* pam_service = NULL;
@@ -50,6 +64,7 @@ static int _config_setting_get_unsigned_int(const config_setting_t *cfg_item, un
 
 static void cleanup_config(void);
 static void load_config(void);
+static void load_auto_timeout(config_t *cfg);
 static void load_fallback_config(void);
 static void load_misc(config_t *cfg);
 static void load_colors(config_t *cfg);
@@ -217,6 +232,7 @@ load_config(void)
 		load_colors(&cfg);
 		load_logo(&cfg);
 		load_secret_commands(&cfg);
+		load_auto_timeout(&cfg);
 	} else if (strcmp(config_error_text(&cfg), "file I/O error")) {
 		fprintf(stderr, "Error reading config at %s\n", config_file);
 		fprintf(stderr, "%s:%d - %s\n",
@@ -253,6 +269,14 @@ load_fallback_config(void)
 	if (!rectangles) {
 		disablefunc(ShowLogo);
 	}
+
+	if (!auto_timeout_command) {
+		disablefunc(AutoTimeout);
+	}
+
+	if (!exit_command) {
+		disablefunc(ExitCommand);
+	}
 }
 
 void
@@ -263,6 +287,8 @@ cleanup_config(void)
 	free(user);
 	free(group);
 	free(failure_command);
+	free(exit_command);
+	free(auto_timeout_command);
 	free(pam_service);
 
 	if (colorname != def_colorname) {
@@ -316,6 +342,11 @@ load_misc(config_t *cfg)
 	config_lookup_int(cfg, "on_failure.after_this_many_failures", &failure_count);
 	config_lookup_sloppy_bool(cfg, "on_failure.run_once", &failure_command_run_once);
 	config_lookup_strdup(cfg, "on_failure.run_command", &failure_command);
+	config_lookup_strdup(cfg, "exit_command.run_command", &exit_command);
+
+	/* Constraints */
+	blocks_x_count = MAX(blocks_x_count, 1);
+	blocks_y_count = MAX(blocks_y_count, 1);
 }
 
 void
@@ -403,6 +434,14 @@ load_secret_commands(config_t *cfg)
 		config_setting_lookup_strdup(secret_t, "password", &secret_commands[i].password);
 		config_setting_lookup_strdup(secret_t, "command", &secret_commands[i].command);
 	}
+}
+
+void
+load_auto_timeout(config_t *cfg)
+{
+	config_lookup_int(cfg, "automatic_timeout.after_this_many_seconds", &auto_timeout_offset);
+	config_lookup_int(cfg, "automatic_timeout.run_once", &auto_timeout_run_once);
+	config_lookup_strdup(cfg, "automatic_timeout.run_command", &auto_timeout_command);
 }
 
 void

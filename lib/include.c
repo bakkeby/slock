@@ -13,4 +13,8 @@
 #include "pamauth.c"
 #endif
 
+#if HAVE_PTHREAD
+#include "auto_timeout.c"
+#endif
+
 #include "xresources.c"

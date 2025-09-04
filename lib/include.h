@@ -12,4 +12,8 @@
 #include "pamauth.h"
 #endif
 
+#if HAVE_PTHREAD
+#include "auto_timeout.h"
+#endif
+
 #include "keypress_feedback.h"

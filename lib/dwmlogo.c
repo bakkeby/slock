@@ -20,12 +20,17 @@ resizerectangles(struct lock *lock)
 static void
 drawlogo(Display *dpy, struct lock *lock, int color)
 {
+	#if HAVE_IMLIB
 	if (enabled(BackgroundImage)) {
 		lock->drawable = lock->bgmap;
 	} else {
 		XSetForeground(dpy, lock->gc, lock->colors[BACKGROUND]);
 		XFillRectangle(dpy, lock->drawable, lock->gc, 0, 0, lock->x, lock->y);
 	}
+	#else
+	XSetForeground(dpy, lock->gc, lock->colors[BACKGROUND]);
+	XFillRectangle(dpy, lock->drawable, lock->gc, 0, 0, lock->x, lock->y);
+	#endif
 	XSetForeground(dpy, lock->gc, lock->colors[color]);
 	XFillRectangles(dpy, lock->drawable, lock->gc, lock->rectangles, num_rectangles);
 	XCopyArea(dpy, lock->drawable, lock->win, lock->gc, 0, 0, lock->x, lock->y, 0, 0);

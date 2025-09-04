@@ -19,8 +19,8 @@ PKG_CONFIG = pkg-config
 #NETBSD=-D_NETBSD_SOURCE
 
 # Optionally Xinerama can be used for multi-monitor awareness, e.g. used for logo positioning
-XINERAMA=-lXinerama
-XINERAMAFLAGS = -DXINERAMA
+#XINERAMA=-lXinerama
+#XINERAMAFLAGS = -DXINERAMA
 
 # Optionally slock can be compiled with PAM authentication support
 #PAMLIB=-lpam
@@ -30,8 +30,11 @@ XINERAMAFLAGS = -DXINERAMA
 #DPMS=-DHAVE_DPMS=1
 
 # Optionally slock can be compiled with image support, e.g. to render a background
-IMLIB=-lImlib2
-IM=-DHAVE_IMLIB=1
+#IMLIB=-lImlib2
+#IM=-DHAVE_IMLIB=1
+
+# Optionally slock can be compiled with threading support, for auto-timeout functionality
+#THREAD=-DHAVE_PTHREAD=1
 
 CONFIG = `$(PKG_CONFIG) --libs libconfig`
 
@@ -40,7 +43,7 @@ INCS = -I. -I/usr/include -I${X11INC}
 LIBS = -L/usr/lib -lc -lcrypt -L${X11LIB} -lX11 -lXext -lXrandr ${XINERAMA} ${CONFIG} ${PAMLIB} ${IMLIB}
 
 # flags
-CPPFLAGS = -DVERSION=\"${VERSION}\" -D_DEFAULT_SOURCE -DHAVE_SHADOW_H ${XINERAMAFLAGS} ${DPMS} ${PAM} ${IM} ${BSD} ${NETBSD}
+CPPFLAGS = -DVERSION=\"${VERSION}\" -D_DEFAULT_SOURCE -DHAVE_SHADOW_H ${XINERAMAFLAGS} ${DPMS} ${PAM} ${IM} ${BSD} ${THREAD} ${NETBSD}
 CFLAGS = -std=c99 -pedantic -Wall -Wno-unused-function -Os ${INCS} ${CPPFLAGS}
 LDFLAGS = -s ${LIBS}
 COMPATSRC = explicit_bzero.c

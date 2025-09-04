@@ -21,7 +21,6 @@
 #include <X11/keysym.h>
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
-
 #include <X11/Xatom.h>
 #include <time.h>
 #include <X11/XKBlib.h>
@@ -402,7 +401,6 @@ readpw(Display *dpy, struct xrandr *rr, struct lock **locks, int nscreens,
 			for (screen = 0; screen < nscreens; screen++)
 				XRaiseWindow(dpy, locks[screen]->win);
 		}
-
 	}
 }
 
@@ -664,6 +662,12 @@ main(int argc, char **argv) {
 		}
 	}
 
+	#if HAVE_PTHREAD
+	/*Start the auto-timeout command in its own thread*/
+	pthread_t thread_id;
+	pthread_create(&thread_id, NULL, timeout_command, NULL);
+	#endif
+
 	/* everything is now blank. Wait for the correct password */
 	readpw(dpy, &rr, locks, nscreens, hash);
 	#if HAVE_DPMS
@@ -680,6 +684,10 @@ main(int argc, char **argv) {
 			XFreeGC(dpy, locks[s]->gc);
 			free(locks[s]->rectangles);
 		}
+	}
+
+	if (enabled(ExitCommand) && exit_command != NULL) {
+		system(exit_command);
 	}
 
 	XSync(dpy, 0);
