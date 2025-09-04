@@ -8,7 +8,7 @@ static const uint64_t
 	PAMAuthentication = 0x40,
 	BackgroundImage = 0x80,
 	ShowLogo = 0x100,
-	FuncPlaceholder0x200 = 0x200,
+	UnlockedScreen = 0x200,
 	FuncPlaceholder0x400 = 0x400,
 	FuncPlaceholder0x800 = 0x800,
 	FuncPlaceholder0x1000 = 0x1000,
@@ -78,9 +78,10 @@ static const struct nv functionality_names[] = {
 	map(KeypressFeedback),
 	map(MediaKeys),
 	map(PAMAuthentication),
+	map(ShowLogo),
 	map(TerminalKeys),
 	map(TurnMonitorOff),
-	map(ShowLogo),
+	map(UnlockedScreen),
 	map(Xresources),
 	{ NULL, 0 }
 };

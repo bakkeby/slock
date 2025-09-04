@@ -532,11 +532,7 @@ lockscreen(Display *dpy, struct xrandr *rr, int screen)
 			                      ButtonPressMask | ButtonReleaseMask |
 			                      PointerMotionMask, GrabModeAsync,
 			                      GrabModeAsync, None,
-			                      #if UNLOCKSCREEN_PATCH
-			                      None,
-			                      #else
-			                      invisible,
-			                      #endif // UNLOCKSCREEN_PATCH
+			                      enabled(UnlockedScreen) ? None : invisible,
 			                      CurrentTime);
 		}
 		if (kbgrab != GrabSuccess) {
@@ -546,9 +542,9 @@ lockscreen(Display *dpy, struct xrandr *rr, int screen)
 
 		/* input is grabbed: we can lock the screen */
 		if (ptgrab == GrabSuccess && kbgrab == GrabSuccess) {
-			#if !UNLOCKSCREEN_PATCH
-			XMapRaised(dpy, lock->win);
-			#endif // UNLOCKSCREEN_PATCH
+			if (disabled(UnlockedScreen)) {
+				XMapRaised(dpy, lock->win);
+			}
 			if (rr->active)
 				XRRSelectInput(dpy, lock->win, RRScreenChangeNotifyMask);
 

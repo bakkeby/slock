@@ -18,10 +18,3 @@
  * https://tools.suckless.org/slock/patches/secret-password/
  */
 #define SECRET_PASSWORD_PATCH 0
-
-/* This patch keeps the screen unlocked but keeps the input locked. That is, the screen
- * is not affected by slock, but users will not be able to interact with the X session
- * unless they enter the correct password.
- * https://tools.suckless.org/slock/patches/unlock_screen/
- */
-#define UNLOCKSCREEN_PATCH 0
