@@ -22,7 +22,7 @@ drawlogo(Display *dpy, struct lock *lock, int color)
 {
 	#if HAVE_IMLIB
 	if (enabled(BackgroundImage)) {
-		lock->drawable = lock->bgmap;
+		// lock->drawable = lock->bgmap;
 	} else {
 		XSetForeground(dpy, lock->gc, lock->colors[BACKGROUND]);
 		XFillRectangle(dpy, lock->drawable, lock->gc, 0, 0, lock->x, lock->y);

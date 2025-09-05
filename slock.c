@@ -365,25 +365,25 @@ readpw(Display *dpy, struct xrandr *rr, struct lock **locks, int nscreens, const
 			if (running && oldc != color) {
 				for (screen = 0; screen < nscreens; screen++) {
 					#if HAVE_IMLIB
-					if (enabled(ShowLogo)) {
-						if (locks[screen]->bgmap) {
-							XSetWindowBackgroundPixmap(dpy, locks[screen]->win, locks[screen]->bgmap);
-						}
-						drawlogo(dpy, locks[screen], color);
-					} else if (locks[screen]->bgmap) {
-						XSetWindowBackgroundPixmap(dpy, locks[screen]->win, locks[screen]->bgmap);
-						XClearWindow(dpy, locks[screen]->win);
-					} else {
-						XSetWindowBackground(dpy, locks[screen]->win, locks[screen]->colors[color]);
-						XClearWindow(dpy, locks[screen]->win);
-					}
+					// if (enabled(ShowLogo)) {
+					// 	if (locks[screen]->bgmap) {
+					// 		XSetWindowBackgroundPixmap(dpy, locks[screen]->win, locks[screen]->bgmap);
+					// 	}
+					// 	drawlogo(dpy, locks[screen], color);
+					// } else if (locks[screen]->bgmap) {
+					// 	XSetWindowBackgroundPixmap(dpy, locks[screen]->win, locks[screen]->bgmap);
+					// 	XClearWindow(dpy, locks[screen]->win);
+					// } else {
+					// 	XSetWindowBackground(dpy, locks[screen]->win, locks[screen]->colors[color]);
+					// 	XClearWindow(dpy, locks[screen]->win);
+					// }
 					#else
-					if (enabled(ShowLogo)) {
-						drawlogo(dpy, locks[screen], color);
-					} else {
-						XSetWindowBackground(dpy, locks[screen]->win, locks[screen]->colors[color]);
-						XClearWindow(dpy, locks[screen]->win);
-					}
+					// if (enabled(ShowLogo)) {
+					// 	drawlogo(dpy, locks[screen], color);
+					// } else {
+					// 	XSetWindowBackground(dpy, locks[screen]->win, locks[screen]->colors[color]);
+					// 	XClearWindow(dpy, locks[screen]->win);
+					// }
 					#endif
 				}
 				oldc = color;
@@ -430,12 +430,6 @@ lockscreen(Display *dpy, struct xrandr *rr, int screen)
 	lock->screen = screen;
 	lock->root = RootWindow(dpy, lock->screen);
 
-	#if HAVE_IMLIB
-	if (enabled(BackgroundImage)) {
-		render_lock_image(dpy, lock, image);
-	}
-	#endif
-
 	for (i = 0; i < NUMCOLS; i++) {
 		XAllocNamedColor(dpy, DefaultColormap(dpy, lock->screen),
 		                 colorname[i], &color, &dummy);
@@ -444,7 +438,7 @@ lockscreen(Display *dpy, struct xrandr *rr, int screen)
 
 	lock->x = DisplayWidth(dpy, lock->screen);
 	lock->y = DisplayHeight(dpy, lock->screen);
-	if (enabled(ShowLogo)) {
+	// if (enabled(ShowLogo)) {
 		#ifdef XINERAMA
 		if ((info = XineramaQueryScreens(dpy, &n))) {
 			lock->xoff = info[0].x_org;
@@ -458,33 +452,40 @@ lockscreen(Display *dpy, struct xrandr *rr, int screen)
 			lock->mw = lock->x;
 			lock->mh = lock->y;
 		}
+	// }
 
-		lock->drawable = XCreatePixmap(dpy, lock->root, lock->x, lock->y, DefaultDepth(dpy, screen));
-		lock->gc = XCreateGC(dpy, lock->root, 0, NULL);
-		XSetLineAttributes(dpy, lock->gc, 1, LineSolid, CapButt, JoinMiter);
-	}
+	lock->drawable = XCreatePixmap(dpy, lock->root, lock->x, lock->y, DefaultDepth(dpy, screen));
+	lock->gc = XCreateGC(dpy, lock->root, 0, NULL);
+	XSetLineAttributes(dpy, lock->gc, 1, LineSolid, CapButt, JoinMiter);
 
 	/* init */
 	wa.override_redirect = 1;
-	wa.background_pixel = lock->colors[enabled(ShowLogo) ? BACKGROUND : INIT];
+	// wa.background_pixel = lock->colors[enabled(ShowLogo) ? BACKGROUND : INIT];
+	wa.background_pixmap = None;
+
+	fprintf(stderr, "creating window, lock x = %d, y = %d\n", lock->x, lock->y);
 	lock->win = XCreateWindow(dpy, lock->root, 0, 0,
 	                          lock->x,
 	                          lock->y,
 	                          0, DefaultDepth(dpy, lock->screen),
 	                          CopyFromParent,
 	                          DefaultVisual(dpy, lock->screen),
-	                          CWOverrideRedirect | CWBackPixel, &wa);
+	                          CWOverrideRedirect | CWBackPixmap, &wa);
 
-	#if HAVE_IMLIB
-	if (lock->bgmap) {
-		XSetWindowBackgroundPixmap(dpy, lock->win, lock->bgmap);
-	}
-	#endif
+
+
+
 	lock->pmap = XCreateBitmapFromData(dpy, lock->win, curs, 8, 8);
 	invisible = XCreatePixmapCursor(dpy, lock->pmap, lock->pmap,
 	                                &color, &color, 0, 0);
 	XDefineCursor(dpy, lock->win, invisible);
 
+
+	#if HAVE_IMLIB
+	// if (lock->bgmap) {
+	// 	XSetWindowBackgroundPixmap(dpy, lock->win, lock->bgmap);
+	// }
+	#endif
 	if (enabled(ShowLogo)) {
 		resizerectangles(lock);
 	}
@@ -508,20 +509,35 @@ lockscreen(Display *dpy, struct xrandr *rr, int screen)
 		if (ptgrab == GrabSuccess && kbgrab == GrabSuccess) {
 			if (disabled(UnlockedScreen)) {
 				XMapRaised(dpy, lock->win);
+
+	#if HAVE_IMLIB
+	if (enabled(BackgroundImage)) {
+		create_lock_image(dpy, lock);
+	}
+	#endif
+
+	#if HAVE_IMLIB
+	if (enabled(BackgroundImage)) {
+		render_lock_image(dpy, lock, image);
+	}
+	#endif
 			}
 			if (rr->active)
 				XRRSelectInput(dpy, lock->win, RRScreenChangeNotifyMask);
 
 			XSelectInput(dpy, lock->root, SubstructureNotifyMask);
 			locktime = time(NULL);
+
 			if (enabled(ShowLogo)) {
 				drawlogo(dpy, lock, INIT);
 			}
+
 			if (enabled(Alpha)) {
 				unsigned int opacity = (unsigned int)(alpha * 0xffffffffU);
 				XChangeProperty(dpy, lock->win, XInternAtom(dpy, "_NET_WM_WINDOW_OPACITY", False), XA_CARDINAL, 32, PropModeReplace, (unsigned char *)&opacity, 1L);
 			}
 			XSync(dpy, False);
+	fprintf(stderr, "<--- lockscreen\n");
 			return lock;
 		}
 
@@ -614,12 +630,6 @@ main(int argc, char **argv) {
 		xrdb_init(dpy);
 	}
 
-	#if HAVE_IMLIB
-	if (enabled(BackgroundImage)) {
-		create_lock_image(dpy);
-	}
-	#endif
-
 	time_t t;
 	srand((unsigned) time(&t));
 
@@ -637,6 +647,7 @@ main(int argc, char **argv) {
 			break;
 		}
 	}
+
 	XSync(dpy, 0);
 
 	/* did we manage to lock everything? */
