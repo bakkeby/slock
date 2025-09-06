@@ -457,10 +457,7 @@ generate_resource_strings(void)
 	add_resource_binding("failed", &colorname[FAILED]);
 	add_resource_binding("capslock", &colorname[CAPS]);
 	add_resource_binding("blocks", &colorname[BLOCKS]);
-
-	#if HAVE_PAM
 	add_resource_binding("pamauth", &colorname[PAM]);
-	#endif
 }
 
 void

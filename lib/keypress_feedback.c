@@ -15,6 +15,10 @@ draw_key_feedback(Display *dpy, struct lock **locks, int screen)
 
 	XGetGeometry(dpy, win, &root_win, &x, &y, &sw, &sh, &du, &du);
 
+	static VHSState vhs = {0};
+	effect_vhs_pixmap(dpy, locks[screen]->bgmap, gc, &vhs);
+	XSetWindowBackgroundPixmap(dpy, locks[screen]->win, locks[screen]->bgmap);
+
 	screen_width = (int)sw - blocks_x_min;
 	screen_height = (int)sh - blocks_y_min;
 
@@ -40,4 +44,6 @@ draw_key_feedback(Display *dpy, struct lock **locks, int screen)
 	XFillRectangle(dpy, win, gc, x, y, width, height);
 
 	XFreeGC(dpy, gc);
+	XClearWindow(dpy, locks[screen]->win);
+	XFlush(dpy);
 }
