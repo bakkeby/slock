@@ -1,12 +1,10 @@
 /* Patches */
+#include "filters/filters.h"
 #include "func.h"
-
-#if HAVE_IMLIB
 #include "background_image.h"
-#endif
-
 #include "logo.h"
 #include "secret_commands.h"
+#include "keypress_feedback.h"
 
 #if HAVE_PAM
 #include "pamauth.h"
@@ -15,5 +13,3 @@
 #if HAVE_PTHREAD
 #include "auto_timeout.h"
 #endif
-
-#include "keypress_feedback.h"

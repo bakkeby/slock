@@ -13,6 +13,9 @@ slock tool, how to install it and how it works.
 
    - runtime configuration
    - exit command (run a command after entering a valid password)
+   - failure command (run a command after entering the wrong password too many times)
+   - screenshot without imlib2
+   - can apply graphical filters on background image, as keyboard feedback and on failure
 
 ### Patches incorporated:
 

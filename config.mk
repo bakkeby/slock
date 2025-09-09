@@ -18,9 +18,10 @@ PKG_CONFIG = pkg-config
 # Uncomment for NetBSD
 #NETBSD=-D_NETBSD_SOURCE
 
-# Optionally Xinerama can be used for multi-monitor awareness, e.g. used for logo positioning
-# XINERAMA=-lXinerama
-# XINERAMAFLAGS = -DXINERAMA
+# Optionally Xinerama can be used for multi-monitor awareness.
+# Used for background and logo positioning.
+XINERAMA=-lXinerama
+XINERAMAFLAGS = -DXINERAMA
 
 # Optionally slock can be compiled with PAM authentication support
 #PAMLIB=-lpam
@@ -29,9 +30,12 @@ PKG_CONFIG = pkg-config
 # Optionally slock can be compiled with DPMS support
 #DPMS=-DHAVE_DPMS=1
 
-# Optionally slock can be compiled with image support, e.g. to render a background
-IMLIB=-lImlib2
-IM=-DHAVE_IMLIB=1
+# Optionally slock can be compiled with imlib2 support to load e.g. .png or jpg images
+# to be used as a background. Note that if this is not included slock can still read a
+# farbfeld image without the use of this library. Screenshot of the current desktop is
+# also done without the use of this library.
+#IMLIB=-lImlib2
+#IM=-DHAVE_IMLIB=1
 
 # Optionally slock can be compiled with threading support, for auto-timeout functionality
 #THREAD=-DHAVE_PTHREAD=1

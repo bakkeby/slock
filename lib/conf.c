@@ -7,16 +7,19 @@ const char *progname = "slock";
 static char *user = NULL;
 static char *group = NULL;
 static char **colorname = NULL;
-#if HAVE_IMLIB
 static char *background_image = NULL;
+static EffectFilter *background_filters = NULL;
+static EffectFilter *feedback_filters = NULL;
+static EffectFilter *failure_filters = NULL;
 static int background_pixel_size = 0;
 static int background_blur_radius = 0;
-#endif
 static ResourcePref *resources = NULL;
 uint64_t settings = 0;
 static int num_resources = 0;
-static int num_rectangles = 0;
 static int num_secret_commands = 0;
+static int num_background_filters = 0;
+static int num_feedback_filters = 0;
+static int num_failure_filters = 0;
 static char *failure_command = NULL;
 static int failure_command_run_once = 0;
 static int failure_count = 0;
@@ -30,50 +33,52 @@ static int auto_timeout_run_once = 0;
 static int auto_timeout_offset = 0;
 static char *auto_timeout_command = NULL;
 static char *exit_command = NULL;
-static int blocks_width = 0;
-static int blocks_height = 0;
-static int blocks_x_count = 0;
-static int blocks_y_count = 0;
-static int blocks_y_min = 0;
-static int blocks_y_max = 0;
-static int blocks_x_min = 0;
-static int blocks_x_max = 0;
 static int timetocancel = 0;
 static double alpha = 1.0;
 
 /* PAM service that's used for authentication */
-static char* pam_service = NULL;
+static char *pam_service = NULL;
+
+#define map(F) { #F, F }
+
+static const struct nv float_string_names[] = {
+	map(INIT),
+	map(INPUT),
+	map(FAILED),
+	map(CAPS),
+	map(PAM),
+	map(BLOCKS),
+	{ NULL, 0 }
+};
+
+#undef map
+
+#include "lib/libconfig_helper_functions.c"
 
 static void set_config_path(const char* filename, char *config_path, char *config_file);
-
-static int config_lookup_strdup(const config_t *cfg, const char *name, char **strptr);
-static int config_setting_lookup_strdup(const config_setting_t *cfg, const char *name, char **strptr);
-static int _config_setting_strdup_string(const config_setting_t *cfg_item, char **strptr);
-
-static int config_lookup_sloppy_bool(const config_t *cfg, const char *name, int *ptr);
-static int config_setting_lookup_sloppy_bool(const config_setting_t *cfg, const char *name, int *ptr);
-static int _config_setting_get_sloppy_bool(const config_setting_t *cfg, int *ptr);
-
-static int config_lookup_simple_float(const config_t *cfg, const char *name, float *floatptr);
-static int config_setting_lookup_simple_float(const config_setting_t *cfg, const char *name, float *floatptr);
-static int _config_setting_get_simple_float(const config_setting_t *cfg_item, float *floatptr);
-
-static int config_lookup_unsigned_int(const config_t *cfg, const char *name, unsigned int *ptr);
-static int config_setting_lookup_unsigned_int(const config_setting_t *cfg, const char *name, unsigned int *ptr);
-static int _config_setting_get_unsigned_int(const config_setting_t *cfg_item, unsigned int *ptr);
 
 static void cleanup_config(void);
 static void load_config(void);
 static void load_auto_timeout(config_t *cfg);
 static void load_fallback_config(void);
 static void load_misc(config_t *cfg);
+static void load_background(config_t *cfg);
 static void load_colors(config_t *cfg);
 static void load_functionality(config_t *cfg);
-static void load_secret_commands(config_t *cfg);
+static void load_keypress_feedback(config_t *cfg);
 static void load_logo(config_t *cfg);
+static void load_on_failure(config_t *cfg);
+static void load_secret_commands(config_t *cfg);
+static void load_filters(config_setting_t *filters_t, int *num_filters, EffectFilter **filters);
 
+static FilterFunc *parse_effect_filter(const char *name);
 static void generate_resource_strings(void);
 static void add_resource_binding(const char *string, void *ptr);
+
+int startswith(const char *needle, const char *haystack)
+{
+	return !strncmp(haystack, needle, strlen(needle));
+}
 
 void
 set_config_path(const char* filename, char *config_path, char *config_file)
@@ -92,129 +97,6 @@ set_config_path(const char* filename, char *config_path, char *config_file)
 	snprintf(config_file, PATH_MAX, "%s/%s.cfg", config_path, filename);
 }
 
-int
-config_lookup_strdup(const config_t *cfg, const char *name, char **strptr)
-{
-	return _config_setting_strdup_string(config_lookup(cfg, name), strptr);
-}
-
-
-int
-config_setting_lookup_strdup(const config_setting_t *cfg, const char *name, char **strptr)
-{
-	return _config_setting_strdup_string(config_setting_lookup(cfg, name), strptr);
-}
-
-int
-_config_setting_strdup_string(const config_setting_t *cfg_item, char **strptr)
-{
-	if (!cfg_item)
-		return 0;
-
-	const char *string = config_setting_get_string(cfg_item);
-
-	if (!string)
-		return 0;
-
-	free(*strptr);
-	*strptr = strdup(string);
-	return 1;
-}
-
-int
-config_lookup_sloppy_bool(const config_t *cfg, const char *name, int *ptr)
-{
-	return _config_setting_get_sloppy_bool(config_lookup(cfg, name), ptr);
-}
-
-int
-config_setting_lookup_sloppy_bool(const config_setting_t *cfg, const char *name, int *ptr)
-{
-	return _config_setting_get_sloppy_bool(config_setting_lookup(cfg, name), ptr);
-}
-
-int
-_config_setting_get_sloppy_bool(const config_setting_t *cfg_item, int *ptr)
-{
-	const char *string;
-
-	if (!cfg_item)
-		return 0;
-
-	switch (config_setting_type(cfg_item)) {
-	case CONFIG_TYPE_INT:
-		*ptr = config_setting_get_int(cfg_item);
-		return 1;
-	case CONFIG_TYPE_STRING:
-		string = config_setting_get_string(cfg_item);
-
-		if (string && strlen(string)) {
-			char a = tolower(string[0]);
-			/* Match for positives like "true", "yes" and "on" */
-			*ptr = (a == 't' || a == 'y' || !strcasecmp(string, "on"));
-			return 1;
-		}
-		break;
-	case CONFIG_TYPE_BOOL:
-		*ptr = config_setting_get_bool(cfg_item);
-		return 1;
-	}
-
-	return 0;
-}
-
-int
-config_lookup_simple_float(const config_t *cfg, const char *name, float *floatptr)
-{
-	return _config_setting_get_simple_float(config_lookup(cfg, name), floatptr);
-}
-
-int
-config_setting_lookup_simple_float(const config_setting_t *cfg, const char *name, float *floatptr)
-{
-	return _config_setting_get_simple_float(config_setting_lookup(cfg, name), floatptr);
-}
-
-int
-_config_setting_get_simple_float(const config_setting_t *cfg_item, float *floatptr)
-{
-	if (!cfg_item)
-		return 0;
-
-	double value = config_setting_get_float(cfg_item);
-
-	*floatptr = (float)value;
-	return 1;
-}
-
-int
-config_lookup_unsigned_int(const config_t *cfg, const char *name, unsigned int *ptr)
-{
-	return _config_setting_get_unsigned_int(config_lookup(cfg, name), ptr);
-}
-
-int
-config_setting_lookup_unsigned_int(const config_setting_t *cfg, const char *name, unsigned int *ptr)
-{
-	return _config_setting_get_unsigned_int(config_setting_lookup(cfg, name), ptr);
-}
-
-int
-_config_setting_get_unsigned_int(const config_setting_t *cfg_item, unsigned int *ptr)
-{
-	if (!cfg_item)
-		return 0;
-
-	int integer = config_setting_get_int(cfg_item);
-
-	if (integer >= 0) {
-		*ptr = (unsigned int)integer;
-		return 1;
-	}
-
-	return 1;
-}
-
 void
 load_config(void)
 {
@@ -229,8 +111,11 @@ load_config(void)
 	if (config_read_file(&cfg, config_file)) {
 		load_functionality(&cfg);
 		load_misc(&cfg);
+		load_background(&cfg);
 		load_colors(&cfg);
 		load_logo(&cfg);
+		load_on_failure(&cfg);
+		load_keypress_feedback(&cfg);
 		load_secret_commands(&cfg);
 		load_auto_timeout(&cfg);
 	} else if (strcmp(config_error_text(&cfg), "file I/O error")) {
@@ -264,10 +149,6 @@ load_fallback_config(void)
 
 	if (!pam_service) {
 		disablefunc(PAMAuthentication);
-	}
-
-	if (!rectangles) {
-		disablefunc(ShowLogo);
 	}
 
 	if (!auto_timeout_command) {
@@ -324,29 +205,7 @@ load_misc(config_t *cfg)
 	config_lookup_strdup(cfg, "pam_service", &pam_service);
 	#endif
 
-	#if HAVE_IMLIB
-	config_lookup_strdup(cfg, "background.image", &background_image);
-	config_lookup_int(cfg, "background.pixel_size", &background_pixel_size);
-	config_lookup_int(cfg, "background.blur_radius", &background_blur_radius);
-	#endif
-
-	config_lookup_int(cfg, "blocks.height", &blocks_height);
-	config_lookup_int(cfg, "blocks.width", &blocks_width);
-	config_lookup_int(cfg, "blocks.count_x", &blocks_x_count);
-	config_lookup_int(cfg, "blocks.count_y", &blocks_y_count);
-	config_lookup_int(cfg, "blocks.min_y", &blocks_y_min);
-	config_lookup_int(cfg, "blocks.max_y", &blocks_y_max);
-	config_lookup_int(cfg, "blocks.min_x", &blocks_x_min);
-	config_lookup_int(cfg, "blocks.max_x", &blocks_x_max);
-
-	config_lookup_int(cfg, "on_failure.after_this_many_failures", &failure_count);
-	config_lookup_sloppy_bool(cfg, "on_failure.run_once", &failure_command_run_once);
-	config_lookup_strdup(cfg, "on_failure.run_command", &failure_command);
 	config_lookup_strdup(cfg, "exit_command.run_command", &exit_command);
-
-	/* Constraints */
-	blocks_x_count = MAX(blocks_x_count, 1);
-	blocks_y_count = MAX(blocks_y_count, 1);
 }
 
 void
@@ -360,7 +219,6 @@ load_colors(config_t *cfg)
 
 	colorname = calloc(NUMCOLS, sizeof(char *));
 
-	config_setting_lookup_strdup(cols, "background", &colorname[BACKGROUND]);
 	config_setting_lookup_strdup(cols, "init", &colorname[INIT]);
 	config_setting_lookup_strdup(cols, "input", &colorname[INPUT]);
 	config_setting_lookup_strdup(cols, "failed", &colorname[FAILED]);
@@ -418,10 +276,66 @@ load_logo(config_t *cfg)
 }
 
 void
+load_background(config_t *cfg)
+{
+	config_lookup_strdup(cfg, "background.image", &background_image);
+	config_lookup_int(cfg, "background.pixel_size", &background_pixel_size);
+	config_lookup_int(cfg, "background.blur_radius", &background_blur_radius);
+	load_filters(config_lookup(cfg, "background.filters"), &num_background_filters, &background_filters);
+}
+
+void
+load_keypress_feedback(config_t *cfg)
+{
+	load_filters(config_lookup(cfg, "keypress_feedback.filters"), &num_feedback_filters, &feedback_filters);
+}
+
+void
+load_on_failure(config_t *cfg)
+{
+	config_lookup_int(cfg, "on_failure.after_this_many_failures", &failure_count);
+	config_lookup_sloppy_bool(cfg, "on_failure.run_once", &failure_command_run_once);
+	config_lookup_strdup(cfg, "on_failure.run_command", &failure_command);
+	load_filters(config_lookup(cfg, "on_failure.filters"), &num_failure_filters, &failure_filters);
+}
+
+void
+load_filters(config_setting_t *filters_t, int *num_filters, EffectFilter **filters)
+{
+	int i, p, num_params;
+
+	const char *string;
+	const config_setting_t *filter_t, *params_t;
+
+	if (!filters_t || !config_setting_is_list(filters_t))
+		return;
+
+	*num_filters = config_setting_length(filters_t);
+	*filters = calloc(*num_filters, sizeof(EffectFilter));
+
+	for (i = 0; i < *num_filters; i++) {
+		filter_t = config_setting_get_elem(filters_t, i);
+		if (config_setting_lookup_string(filter_t, "effect", &string)) {
+			(*filters)[i].func = parse_effect_filter(string);
+		}
+
+		params_t = config_setting_lookup(filter_t, "params");
+		if (!params_t)
+			continue;
+
+		num_params = setting_length(params_t);
+		for (p = 0; p < num_params && p < 4; p++) {
+
+			(*filters)[i].parameters[p] = setting_get_float_elem(params_t, p);
+		}
+	}
+}
+
+void
 load_secret_commands(config_t *cfg)
 {
 	int i;
-	config_setting_t *secrets_t, *secret_t;
+	const config_setting_t *secrets_t, *secret_t;
 
 	secrets_t = config_lookup(cfg, "secret_commands");
 	if (!secrets_t || !config_setting_is_list(secrets_t))
@@ -445,13 +359,31 @@ load_auto_timeout(config_t *cfg)
 	config_lookup_strdup(cfg, "automatic_timeout.run_command", &auto_timeout_command);
 }
 
+FilterFunc *
+parse_effect_filter(const char *name)
+{
+	int i;
+
+	if (!name)
+		return NULL;
+
+	if (startswith("filter_", name))
+		name += 7;
+
+    for (i = 0; effect_names[i].name != NULL; i++) {
+        if (!strcmp(effect_names[i].name, name))
+            return effect_names[i].func;
+    }
+
+    return NULL;
+}
+
 void
 generate_resource_strings(void)
 {
 	resources = calloc(NUMCOLS, sizeof(ResourcePref));
 
 	/* Add resource strings */
-	add_resource_binding("background", &colorname[BACKGROUND]);
 	add_resource_binding("locked", &colorname[INIT]);
 	add_resource_binding("input", &colorname[INPUT]);
 	add_resource_binding("failed", &colorname[FAILED]);

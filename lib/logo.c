@@ -3,6 +3,9 @@ resizerectangles(struct lock *lock)
 {
 	int i;
 
+	if (!rectangles)
+		return;
+
 	if (!lock->rectangles) {
 		lock->rectangles = calloc(num_rectangles, sizeof(XRectangle));
 	}
@@ -18,21 +21,16 @@ resizerectangles(struct lock *lock)
 }
 
 static void
-drawlogo(Display *dpy, struct lock *lock, int color)
+drawlogo(Display *dpy, struct lock *lock, int fg)
 {
-	#if HAVE_IMLIB
-	if (enabled(BackgroundImage)) {
-		lock->drawable = lock->bgmap;
-	} else {
-		XSetForeground(dpy, lock->gc, lock->colors[BACKGROUND]);
-		XFillRectangle(dpy, lock->drawable, lock->gc, 0, 0, lock->x, lock->y);
-	}
-	#else
-	XSetForeground(dpy, lock->gc, lock->colors[BACKGROUND]);
-	XFillRectangle(dpy, lock->drawable, lock->gc, 0, 0, lock->x, lock->y);
-	#endif
-	XSetForeground(dpy, lock->gc, lock->colors[color]);
-	XFillRectangles(dpy, lock->drawable, lock->gc, lock->rectangles, num_rectangles);
-	XCopyArea(dpy, lock->drawable, lock->win, lock->gc, 0, 0, lock->x, lock->y, 0, 0);
+	double parameters[8] = { fg };
+	filter_logo(image, parameters, lock);
+
+	/* Push image into pixmap and set window background */
+	XShmPutImage(dpy, lock->bgmap, lock->gc, image,
+             0, 0, 0, 0, lock->x, lock->y, False);
+	XSetWindowBackgroundPixmap(dpy, lock->win, lock->bgmap);
+	XClearWindow(dpy, lock->win);
+	XFlush(dpy);
 	XSync(dpy, False);
 }

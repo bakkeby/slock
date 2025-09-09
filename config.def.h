@@ -3,7 +3,6 @@ static const char *def_user  = "nobody";
 static const char *def_group = "nogroup"; // use "nobody" for arch
 
 static char *def_colorname[NUMCOLS] = {
-	[BACKGROUND] = "#2d2d2d", /* used in the context of logo */
 	[INIT] = "black",         /* after initialization */
 	[INPUT] = "#005577",      /* during input */
 	[FAILED] = "#CC3333",     /* wrong password */
