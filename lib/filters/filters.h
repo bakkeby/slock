@@ -2,6 +2,7 @@
 
 typedef void (FilterFunc)(XImage *img, double parameters[8], struct lock *lock);
 
+static void filter_bloom(XImage *img, double parameters[8], struct lock *lock);
 static void filter_blur(XImage *img, double parameters[8], struct lock *lock);
 static void filter_channels(XImage *img, double parameters[8], struct lock *lock);
 static void filter_chroma_crawl(XImage *img, double parameters[8], struct lock *lock);
@@ -27,6 +28,7 @@ static void filter_sobel(XImage *img, double parameters[8], struct lock *lock);
 static void filter_solid_color(XImage *img, double parameters[8], struct lock *lock);
 static void filter_rain_shift_vert(XImage *img, double parameters[8], struct lock *lock);
 static void filter_rain_shift_horz(XImage *img, double parameters[8], struct lock *lock);
+static void filter_vignette(XImage *img, double parameters[8], struct lock *lock);
 static void filter_vhs_jitter(XImage *img, double parameters[8], struct lock *lock);
 static void filter_vhs_warp_chroma(XImage *img, double parameters[8], struct lock *lock);
 static void filter_wave_distortion(XImage *img, double parameters[8], struct lock *lock);
@@ -47,6 +49,7 @@ struct EffectFilter {
 };
 
 static const struct effect_map effect_names[] = {
+	{ "bloom", filter_bloom },
 	{ "blur", filter_blur },
 	{ "channels", filter_channels },
 	{ "chroma_crawl", filter_chroma_crawl },
@@ -72,6 +75,7 @@ static const struct effect_map effect_names[] = {
 	{ "scanlines", filter_scanlines },
 	{ "sobel", filter_sobel },
 	{ "solid_color", filter_solid_color },
+	{ "vignette", filter_vignette },
 	{ "vhs_jitter", filter_vhs_jitter },
 	{ "vhs_warp_chroma", filter_vhs_warp_chroma },
 	{ "wave_distortion", filter_wave_distortion },

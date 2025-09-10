@@ -1,3 +1,4 @@
+#include "filter_bloom.c"
 #include "filter_blocks.c"
 #include "filter_blur.c"
 #include "filter_channels.c"
@@ -20,4 +21,5 @@
 #include "filter_scanlines.c"
 #include "filter_sobel.c"
 #include "filter_solid.c"
+#include "filter_vignette.c"
 #include "filter_vhs.c"
