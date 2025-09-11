@@ -143,8 +143,8 @@ load_image_from_file(Display *dpy, struct lock *lock, const char *filename)
 			/* Ignore alpha (or you can blend if you want transparency) */
 			uint32_t pixel = (r << 16) | (g << 8) | b;
 
-			if (lock->xoff + x < image->width && lock->yoff + y < image->height) {
-				XPutPixel(image, lock->xoff + x, lock->yoff + y, pixel);
+			if (lock->m->mx + x < image->width && lock->m->my + y < image->height) {
+				XPutPixel(image, lock->m->mx + x, lock->m->my + y, pixel);
 			}
 		}
 	}
@@ -196,7 +196,7 @@ load_image_from_file(Display *dpy, struct lock *lock, const char *filename)
 
 			/* Write into image depending on byte order/format */
 			uint32_t pixel = (r8 << 16) | (g8 << 8) | (b8);
-			XPutPixel(image, x + lock->xoff, y + lock->yoff, pixel);
+			XPutPixel(image, x + lock->m->mx, y + lock->m->my, pixel);
 		}
 	}
 	#endif

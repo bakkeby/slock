@@ -11,10 +11,10 @@ resizerectangles(struct lock *lock)
 	}
 
 	for (i = 0; i < num_rectangles; i++){
-		lock->rectangles[i].x = lock->xoff + (rectangles[i].x * logosize)
-								+ ((lock->mw) / 2) - ((float)logow / 2 * logosize);
-		lock->rectangles[i].y = lock->yoff + (rectangles[i].y * logosize)
-								+  ((lock->mh) / 2) - ((float)logoh / 2 * logosize);
+		lock->rectangles[i].x = lock->m->mx + (rectangles[i].x * logosize)
+								+ ((lock->m->mw) / 2) - ((float)logow / 2 * logosize);
+		lock->rectangles[i].y = lock->m->my + (rectangles[i].y * logosize)
+								+  ((lock->m->mh) / 2) - ((float)logoh / 2 * logosize);
 		lock->rectangles[i].width = rectangles[i].width * logosize;
 		lock->rectangles[i].height = rectangles[i].height * logosize;
 	}

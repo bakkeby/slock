@@ -75,14 +75,21 @@ struct secretpass {
 
 #include "config.def.h"
 
+typedef struct Monitor Monitor;
+struct Monitor {
+	int mx, my, mw, mh; /* monitor size */
+	int dpy;
+	Monitor *next;
+};
+
 struct lock {
 	int screen;
 	Window root, win;
 	Pixmap pmap;
 	Pixmap bgmap;
 	unsigned long colors[NUMCOLS];
+	Monitor *m;
 	unsigned int x, y;
-	unsigned int xoff, yoff, mw, mh;
 	Drawable drawable;
 	GC gc;
 	XRectangle *rectangles;
@@ -97,14 +104,32 @@ struct xrandr {
 #include "lib/include.h"
 
 static void
-die(const char *errstr, ...)
+die(const char *fmt, ...)
 {
-	va_list ap;
+    va_list ap;
+    int saved_errno;
 
-	va_start(ap, errstr);
-	vfprintf(stderr, errstr, ap);
-	va_end(ap);
-	exit(1);
+    saved_errno = errno;
+
+    va_start(ap, fmt);
+    vfprintf(stderr, fmt, ap);
+    va_end(ap);
+
+    if (fmt[0] && fmt[strlen(fmt)-1] == ':')
+        fprintf(stderr, " %s", strerror(saved_errno));
+    fputc('\n', stderr);
+
+    exit(1);
+}
+
+void *
+ecalloc(size_t nmemb, size_t size)
+{
+    void *p;
+
+    if (!(p = calloc(nmemb, size)))
+        die("calloc:");
+    return p;
 }
 
 #include "lib/include.c"
@@ -386,6 +411,7 @@ lockscreen(Display *dpy, struct xrandr *rr, int screen)
 	char curs[] = {0, 0, 0, 0, 0, 0, 0, 0};
 	int i, ptgrab, kbgrab;
 	struct lock *lock;
+	Monitor *m, *mons = NULL;
 	XColor color, dummy;
 	XSetWindowAttributes wa;
 	Cursor invisible;
@@ -412,18 +438,45 @@ lockscreen(Display *dpy, struct xrandr *rr, int screen)
 
 	#ifdef XINERAMA
 	if ((info = XineramaQueryScreens(dpy, &n))) {
-		/* This pulls x and y offsets of the primary screen (info[0]) */
-		lock->xoff = info[0].x_org;
-		lock->yoff = info[0].y_org;
-		lock->mw = info[0].width;
-		lock->mh = info[0].height;
+		for (i = 0; i < n; i++) {
+			int unique = 1;
+			/* Identify unique monitors */
+			for (m = mons; m && m->next; m = m->next) {
+				if (m->mx == info[i].x_org &&
+				    m->my == info[i].y_org &&
+				    m->mw == info[i].width &&
+				    m->mh == info[i].height
+				) {
+					unique = 0;
+					break;
+				}
+			}
+			if (!unique)
+				continue;
+
+			if (!mons) {
+				mons = m = ecalloc(1, sizeof(Monitor));
+			} else {
+				for (m = mons; m && m->next; m = m->next);
+				m = m->next = ecalloc(1, sizeof(Monitor));
+			}
+
+			m->mx = info[i].x_org;
+			m->my = info[i].y_org;
+			m->mw = info[i].width;
+			m->mh = info[i].height;
+		}
 	} else
 	#endif // XINERAMA
 	{
-		lock->xoff = lock->yoff = 0;
-		lock->mw = lock->x;
-		lock->mh = lock->y;
+		mons = ecalloc(1, sizeof(Monitor));
+		mons->mx = 0;
+		mons->my = 0;
+		mons->mw = lock->x;
+		mons->mh = lock->y;
 	}
+
+	lock->m = mons;
 
 	lock->drawable = XCreatePixmap(dpy, lock->root, lock->x, lock->y, DefaultDepth(dpy, screen));
 	lock->gc = XCreateGC(dpy, lock->root, 0, NULL);

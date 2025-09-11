@@ -22,10 +22,10 @@ filter_random_blocks(XImage *img, double parameters[8], struct lock *lock)
 
 	/* Fall back to showing on the primary screen only */
 	if (!min_y && !max_y && !min_x && !max_x) {
-		min_y = lock->yoff;
-		min_x = lock->xoff;
-		max_y = min_y + lock->mh;
-		max_x = min_x + lock->mw;
+		min_y = lock->m->my;
+		min_x = lock->m->mx;
+		max_y = min_y + lock->m->mh;
+		max_x = min_x + lock->m->mw;
 	}
 
 	int area_width = img->width - min_x;
