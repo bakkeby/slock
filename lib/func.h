@@ -65,8 +65,8 @@ static const uint64_t
 	FuncPlaceholder0x8000000000000000 = 0x8000000000000000;
 
 struct nv {
-    const char *name;
-    uint64_t value;
+	const char *name;
+	uint64_t value;
 };
 
 #define map(F) { #F, F }

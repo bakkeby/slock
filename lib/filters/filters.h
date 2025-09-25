@@ -26,6 +26,7 @@ static void filter_random_blocks(XImage *img, double parameters[8], struct lock 
 static void filter_scanlines(XImage *img, double parameters[8], struct lock *lock);
 static void filter_sobel(XImage *img, double parameters[8], struct lock *lock);
 static void filter_solid_color(XImage *img, double parameters[8], struct lock *lock);
+static void filter_temperature(XImage *img, double parameters[8], struct lock *lock);
 static void filter_rain_shift_vert(XImage *img, double parameters[8], struct lock *lock);
 static void filter_rain_shift_horz(XImage *img, double parameters[8], struct lock *lock);
 static void filter_vignette(XImage *img, double parameters[8], struct lock *lock);
@@ -75,6 +76,7 @@ static const struct effect_map effect_names[] = {
 	{ "scanlines", filter_scanlines },
 	{ "sobel", filter_sobel },
 	{ "solid_color", filter_solid_color },
+	{ "temperature", filter_temperature },
 	{ "vignette", filter_vignette },
 	{ "vhs_jitter", filter_vhs_jitter },
 	{ "vhs_warp_chroma", filter_vhs_warp_chroma },

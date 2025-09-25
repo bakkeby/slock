@@ -21,5 +21,6 @@
 #include "filter_scanlines.c"
 #include "filter_sobel.c"
 #include "filter_solid.c"
+#include "filter_temperature.c"
 #include "filter_vignette.c"
 #include "filter_vhs.c"
