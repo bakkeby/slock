@@ -1,5 +1,6 @@
 #include "filter_bloom.c"
 #include "filter_blocks.c"
+#include "filter_block_shuffle.c"
 #include "filter_blur.c"
 #include "filter_channels.c"
 #include "filter_chroma.c"

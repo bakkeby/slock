@@ -324,7 +324,7 @@ load_filters(config_setting_t *filters_t, int *num_filters, EffectFilter **filte
 			continue;
 
 		num_params = setting_length(params_t);
-		for (p = 0; p < num_params && p < 4; p++) {
+		for (p = 0; p < num_params && p < 8; p++) {
 
 			(*filters)[i].parameters[p] = setting_get_float_elem(params_t, p);
 		}

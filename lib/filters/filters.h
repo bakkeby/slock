@@ -3,6 +3,7 @@
 typedef void (FilterFunc)(XImage *img, double parameters[8], struct lock *lock);
 
 static void filter_bloom(XImage *img, double parameters[8], struct lock *lock);
+static void filter_block_shuffle(XImage *img, double parameters[8], struct lock *lock);
 static void filter_blur(XImage *img, double parameters[8], struct lock *lock);
 static void filter_channels(XImage *img, double parameters[8], struct lock *lock);
 static void filter_chroma_crawl(XImage *img, double parameters[8], struct lock *lock);
@@ -51,6 +52,7 @@ struct EffectFilter {
 
 static const struct effect_map effect_names[] = {
 	{ "bloom", filter_bloom },
+	{ "block_shuffle", filter_block_shuffle },
 	{ "blur", filter_blur },
 	{ "channels", filter_channels },
 	{ "chroma_crawl", filter_chroma_crawl },
