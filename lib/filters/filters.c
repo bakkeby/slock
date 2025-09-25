@@ -6,6 +6,7 @@
 #include "filter_channels.c"
 #include "filter_chroma.c"
 #include "filter_color_bleed.c"
+#include "filter_contrast.c"
 #include "filter_crt.c"
 #include "filter_distortion.c"
 #include "filter_emboss.c"
