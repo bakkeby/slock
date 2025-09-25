@@ -13,6 +13,7 @@ filter_rain_shift_vert(XImage *img, double parameters[8], struct lock *lock)
 	if (!img || max_shift <= 0)
 		return;
 
+	Monitor *m;
 	static int seeded = 0;
 	if (!seeded) {
 		srand((unsigned)time(NULL));
@@ -26,22 +27,24 @@ filter_rain_shift_vert(XImage *img, double parameters[8], struct lock *lock)
 	if (!col_buf)
 		return;
 
-	for (int x = 0; x < img->width; ++x) {
-		/* copy column into temporary buffer */
-		for (int y = 0; y < img->height; ++y) {
-			unsigned char *src = (unsigned char *)img->data +
-								 y * img->bytes_per_line + x * bpp;
-			memcpy(col_buf + y * bpp, src, bpp);
-		}
+	for (m = lock->m; m; m = m->next) {
+		for (int x = m->mx; x < m->mw; ++x) {
+			/* copy column into temporary buffer */
+			for (int y = m->my; y < m->mh; ++y) {
+				unsigned char *src = (unsigned char *)img->data +
+									 y * img->bytes_per_line + x * bpp;
+				memcpy(col_buf + y * bpp, src, bpp);
+			}
 
-		int offset = rand() % (max_shift + 1);   /* 0 … max_shift */
+			int offset = rand() % (max_shift + 1);   /* 0 … max_shift */
 
-		/* write column back, shifted downwards (wrap around) */
-		for (int y = 0; y < img->height; ++y) {
-			int src_y = (y - offset + img->height) % img->height;
-			unsigned char *dst = (unsigned char *)img->data +
-								 y * img->bytes_per_line + x * bpp;
-			memcpy(dst, col_buf + src_y * bpp, bpp);
+			/* write column back, shifted downwards (wrap around) */
+			for (int y = m->my; y < m->mh; ++y) {
+				int src_y = (y - offset + m->mh) % m->mh;
+				unsigned char *dst = (unsigned char *)img->data +
+									 y * img->bytes_per_line + x * bpp;
+				memcpy(dst, col_buf + src_y * bpp, bpp);
+			}
 		}
 	}
 	free(col_buf);
@@ -64,6 +67,7 @@ filter_rain_shift_horz(XImage *img, double parameters[8], struct lock *lock)
 	if (!img || max_shift <= 0)
 		return;
 
+	Monitor *m;
 	static int seeded = 0;
 	if (!seeded) {
 		srand((unsigned)time(NULL));
@@ -77,23 +81,25 @@ filter_rain_shift_horz(XImage *img, double parameters[8], struct lock *lock)
 	unsigned char *row_buf = malloc(img->width * bpp);
 	if (!row_buf) return;                       /* OOM guard */
 
-	for (int y = 0; y < img->height; ++y) {
-		/* copy the whole row into row_buf */
-		unsigned char *src_row = (unsigned char *)img->data +
-								 y * img->bytes_per_line;
-		memcpy(row_buf, src_row, img->width * bpp);
+	for (m = lock->m; m; m = m->next) {
+		for (int y = m->my; y < m->mh; ++y) {
+			/* copy the whole row into row_buf */
+			unsigned char *src_row = (unsigned char *)img->data +
+									 y * img->bytes_per_line;
+			memcpy(row_buf, src_row, m->mw * bpp);
 
-		/* pick a random horizontal offset: 0 … max_shift */
-		int offset = rand() % (max_shift + 1);
+			/* pick a random horizontal offset: 0 … max_shift */
+			int offset = rand() % (max_shift + 1);
 
-		/* optionally randomise direction (left/right) */
-		if (rand() & 1) offset = -offset;      /* 50 % left, 50 % right */
+			/* optionally randomise direction (left/right) */
+			if (rand() & 1) offset = -offset;      /* 50 % left, 50 % right */
 
-		/* write the row back, shifted with wrap‑around */
-		for (int x = 0; x < img->width; ++x) {
-			int src_x = (x - offset + img->width) % img->width;
-			unsigned char *dst = src_row + x * bpp;
-			memcpy(dst, row_buf + src_x * bpp, bpp);
+			/* write the row back, shifted with wrap‑around */
+			for (int x = m->mx; x < m->mw; ++x) {
+				int src_x = (x - offset + m->mw) % m->mw;
+				unsigned char *dst = src_row + x * bpp;
+				memcpy(dst, row_buf + src_x * bpp, bpp);
+			}
 		}
 	}
 	free(row_buf);

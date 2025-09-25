@@ -19,6 +19,7 @@ static void filter_flip(XImage *img, double parameters[8], struct lock *lock);
 static void filter_ghosting(XImage *img, double parameters[8], struct lock *lock);
 static void filter_grayscale(XImage *img, double parameters[8], struct lock *lock);
 static void filter_horizontal_tear(XImage *img, double parameters[8], struct lock *lock);
+static void filter_hue(XImage *img, double parameters[8], struct lock *lock);
 static void filter_invert(XImage *img, double parameters[8], struct lock *lock);
 static void filter_logo(XImage *img, double parameters[8], struct lock *lock);
 static void filter_noise(XImage *img, double parameters[8], struct lock *lock);
@@ -28,6 +29,7 @@ static void filter_mosaic(XImage *img, double parameters[8], struct lock *lock);
 static void filter_pixelate(XImage *img, double parameters[8], struct lock *lock);
 static void filter_posterize(XImage *img, double parameters[8], struct lock *lock);
 static void filter_random_blocks(XImage *img, double parameters[8], struct lock *lock);
+static void filter_saturation(XImage *img, double parameters[8], struct lock *lock);
 static void filter_scanlines(XImage *img, double parameters[8], struct lock *lock);
 static void filter_sobel(XImage *img, double parameters[8], struct lock *lock);
 static void filter_solid_color(XImage *img, double parameters[8], struct lock *lock);
@@ -74,6 +76,7 @@ static const struct effect_map effect_names[] = {
 	{ "ghosting", filter_ghosting },
 	{ "grayscale", filter_grayscale },
 	{ "horizontal_tear", filter_horizontal_tear },
+	{ "hue", filter_hue },
 	{ "invert", filter_invert },
 	{ "logo", filter_logo },
 	{ "modulation_glitch", filter_modulation_glitch },
@@ -85,6 +88,7 @@ static const struct effect_map effect_names[] = {
 	{ "random_blocks", filter_random_blocks },
 	{ "rain_shift_vert", filter_rain_shift_vert },
 	{ "rain_shift_horz", filter_rain_shift_horz },
+	{ "saturation", filter_saturation },
 	{ "scanlines", filter_scanlines },
 	{ "sobel", filter_sobel },
 	{ "solid_color", filter_solid_color },
