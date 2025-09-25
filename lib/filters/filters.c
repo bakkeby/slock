@@ -7,6 +7,7 @@
 #include "filter_color_bleed.c"
 #include "filter_crt.c"
 #include "filter_distortion.c"
+#include "filter_emboss.c"
 #include "filter_film_grain.c"
 #include "filter_flip.c"
 #include "filter_ghosting.c"

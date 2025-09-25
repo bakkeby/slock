@@ -10,6 +10,7 @@ static void filter_chroma_crawl(XImage *img, double parameters[8], struct lock *
 static void filter_chroma_drift(XImage *img, double parameters[8], struct lock *lock);
 static void filter_color_bleed(XImage *img, double parameters[8], struct lock *lock);
 static void filter_crt_effect(XImage *img, double parameters[8], struct lock *lock);
+static void filter_emboss(XImage *img, double parameters[8], struct lock *lock);
 static void filter_dual_kawase_blur(XImage *img, double parameters[8], struct lock *lock);
 static void filter_film_grain(XImage *img, double parameters[8], struct lock *lock);
 static void filter_flip(XImage *img, double parameters[8], struct lock *lock);
@@ -61,6 +62,8 @@ static const struct effect_map effect_names[] = {
 	{ "color_bleed", filter_color_bleed },
 	{ "crt_effect", filter_crt_effect },
 	{ "dual_kawase_blur", filter_blur },
+	{ "emboss", filter_emboss },
+	{ "relief", filter_emboss },
 	{ "film_grain", filter_film_grain },
 	{ "flip", filter_flip },
 	{ "ghosting", filter_ghosting },
