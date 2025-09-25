@@ -2,6 +2,7 @@
 #include "filter_blocks.c"
 #include "filter_block_shuffle.c"
 #include "filter_blur.c"
+#include "filter_brightness.c"
 #include "filter_channels.c"
 #include "filter_chroma.c"
 #include "filter_color_bleed.c"
