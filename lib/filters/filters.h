@@ -18,6 +18,7 @@ static void filter_film_grain(XImage *img, double parameters[8], struct lock *lo
 static void filter_flip(XImage *img, double parameters[8], struct lock *lock);
 static void filter_ghosting(XImage *img, double parameters[8], struct lock *lock);
 static void filter_grayscale(XImage *img, double parameters[8], struct lock *lock);
+static void filter_halftone(XImage *img, double parameters[8], struct lock *lock);
 static void filter_horizontal_tear(XImage *img, double parameters[8], struct lock *lock);
 static void filter_hue(XImage *img, double parameters[8], struct lock *lock);
 static void filter_invert(XImage *img, double parameters[8], struct lock *lock);
@@ -75,6 +76,7 @@ static const struct effect_map effect_names[] = {
 	{ "flip", filter_flip },
 	{ "ghosting", filter_ghosting },
 	{ "grayscale", filter_grayscale },
+	{ "halftone", filter_halftone },
 	{ "horizontal_tear", filter_horizontal_tear },
 	{ "hue", filter_hue },
 	{ "invert", filter_invert },
