@@ -29,7 +29,7 @@ kelvin_to_rgb(double kelvin, double *r, double *g, double *b)
 }
 
 void
-filter_temperature(XImage *img, double parameters[8], struct lock *lock)
+filter_temperature(XImage *img, EffectParams *p, struct lock *lock)
 {
 	if (!img || !img->data || !lock) return;
 
@@ -40,11 +40,11 @@ filter_temperature(XImage *img, double parameters[8], struct lock *lock)
 	int stride = img->bytes_per_line;
 
 	/* Resolve parameters */
-	double kelvin = (parameters[0] > 0 ? parameters[0] : 6500);
+	double kelvin = (p->parameters[0] > 0 ? p->parameters[0] : 6500);
 	if (kelvin < 1000) kelvin = 1000;
 	if (kelvin > 40000) kelvin = 40000;
 
-	double strength = parameters[1];
+	double strength = p->parameters[1];
 	if (strength < 0.0) strength = 0.0;
 	if (strength > 1.0) strength = 1.0;
 

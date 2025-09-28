@@ -1,8 +1,8 @@
 void
-filter_scanlines(XImage *img, double parameters[8], struct lock *lock)
+filter_scanlines(XImage *img, EffectParams *p, struct lock *lock)
 {
-    int spacing = parameters[0];
-    float intensity = (float)parameters[1];
+    int spacing = p->parameters[0];
+    float intensity = (float)p->parameters[1];
 
     int width  = img->width;
     int height = img->height;

@@ -1,4 +1,4 @@
-This is a version of st that is built on [slock-flexipatch](https://github.com/bakkeby/slock-flexipatch) and the main difference between this and other builds of slock is that this one comes with runtime configuration.
+This is a version of slock that is built on [slock-flexipatch](https://github.com/bakkeby/slock-flexipatch) and the main difference between this and other builds of slock is that this one comes with runtime configuration.
 
 That means that slock can be reconfigured without having to recompile it.
 
@@ -9,7 +9,7 @@ slock tool, how to install it and how it works.
 
 ---
 
-### Notable additions to st (beyond patches)
+### Notable additions to slock (beyond patches)
 
    - runtime configuration
    - exit command (run a command after entering a valid password)

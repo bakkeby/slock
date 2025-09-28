@@ -9,7 +9,7 @@ draw_key_feedback(Display *dpy, struct lock **locks, int screen)
 
 	for (i = 0; i < num_feedback_filters; i++) {
 		if (feedback_filters[i].func) {
-			feedback_filters[i].func(image, feedback_filters[i].parameters, lock);
+			feedback_filters[i].func(image, &feedback_filters[i], lock);
 		}
 	}
 

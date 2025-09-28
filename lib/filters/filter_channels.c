@@ -1,11 +1,11 @@
 void
-filter_channels(XImage *img, double parameters[8], struct lock *lock)
+filter_channels(XImage *img, EffectParams *p, struct lock *lock)
 {
     if (!img || !img->data) return;
 
-    int keep_r = (int)parameters[0]; /* 1 = keep, 0 = remove */
-    int keep_g = (int)parameters[1];
-    int keep_b = (int)parameters[2];
+    int keep_r = (int)p->parameters[0]; /* 1 = keep, 0 = remove */
+    int keep_g = (int)p->parameters[1];
+    int keep_b = (int)p->parameters[2];
 
     int bpp = img->bits_per_pixel / 8;
     if (bpp < 3) return; /* must have RGB */

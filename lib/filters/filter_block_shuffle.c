@@ -9,21 +9,19 @@
  * parameters[1] = tile height  (default 32)
  * parameters[2] = randomize?   (0 = reverse order, 1 = random shuffle)
  * parameters[3] = scramble probability (0.0–1.0, default=1.0)
- * parameters[4] = seed         (if randomize=1, default=time(NULL))
  * ---------------------------------------------------------------------- */
 void
-filter_block_shuffle(XImage *img, double parameters[8], struct lock *lock)
+filter_block_shuffle(XImage *img, EffectParams *p, struct lock *lock)
 {
 	if (!img || !img->data || !lock) return;
 
 	int bpp    = (img->bits_per_pixel + 7) / 8;
 	int stride = img->bytes_per_line;
 
-	int tile_w = (int)(parameters[0] > 0 ? parameters[0] : 32);
-	int tile_h = (int)(parameters[1] > 0 ? parameters[1] : 32);
-	int do_rand = (int)(parameters[2] > 0 ? 1 : 0);
-	double prob = (parameters[3] >= 0 && parameters[3] <= 1) ? parameters[3] : 1.0;
-	unsigned int seed = (parameters[4] > 0) ? (unsigned)parameters[4] : (unsigned)time(NULL);
+	int tile_w = (int)(p->parameters[0] > 0 ? p->parameters[0] : 32);
+	int tile_h = (int)(p->parameters[1] > 0 ? p->parameters[1] : 32);
+	int do_rand = (int)(p->parameters[2] > 0 ? 1 : 0);
+	double prob = (p->parameters[3] >= 0 && p->parameters[3] <= 1) ? p->parameters[3] : 1.0;
 
 	if (tile_w < 1) tile_w = 1;
 	if (tile_h < 1) tile_h = 1;
@@ -32,8 +30,6 @@ filter_block_shuffle(XImage *img, double parameters[8], struct lock *lock)
 	unsigned char *src_copy = malloc(stride * img->height);
 	if (!src_copy) return;
 	memcpy(src_copy, img->data, stride * img->height);
-
-	srand(seed);
 
 	for (Monitor *m = lock->m; m; m = m->next) {
 		int tiles_x = m->mw / tile_w;

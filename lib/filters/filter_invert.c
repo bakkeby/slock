@@ -1,5 +1,5 @@
 void
-filter_invert(XImage *img, double parameters[8], struct lock *lock)
+filter_invert(XImage *img, EffectParams *p, struct lock *lock)
 {
     int width  = img->width;
     int height = img->height;

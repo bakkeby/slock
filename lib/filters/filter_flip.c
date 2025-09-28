@@ -1,13 +1,13 @@
 void
-filter_flip(XImage *img, double parameters[8], struct lock *lock)
+filter_flip(XImage *img, EffectParams *p, struct lock *lock)
 {
 	if (!img || !img->data || !lock || !lock->m)
 		return;
 
 	Monitor *m;
 	int y;
-	int flip_h = (int)parameters[0];
-	int flip_v = (int)parameters[1];
+	int flip_h = (int)p->parameters[0];
+	int flip_v = (int)p->parameters[1];
 
 	if (!flip_h && !flip_v)
 		return; /* nothing to do */

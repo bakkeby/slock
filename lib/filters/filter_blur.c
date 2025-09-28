@@ -1,7 +1,7 @@
 void
-filter_blur(XImage *img, double parameters[8], struct lock *lock)
+filter_blur(XImage *img, EffectParams *p, struct lock *lock)
 {
-	int radius = (int)parameters[0];
+	int radius = (int)p->parameters[0];
 
 	int width  = img->width;
 	int height = img->height;
@@ -73,10 +73,10 @@ static inline void set_pixel(unsigned char *buf,
    dual kawase blur
    ------------------------------------------------------------- */
 void
-filter_dual_kawase_blur(XImage *img, double parameters[8], struct lock *lock)
+filter_dual_kawase_blur(XImage *img, EffectParams *p, struct lock *lock)
 {
-	int iterations = (int)parameters[0];
-	int radius = (int)parameters[1];
+	int iterations = (int)p->parameters[0];
+	int radius = (int)p->parameters[1];
 
 	if (!img || iterations <= 0 || radius < 1)
 		return;

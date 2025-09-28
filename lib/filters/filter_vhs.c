@@ -5,7 +5,7 @@ typedef struct {
 } VHSRegion;
 
 void
-filter_vhs_warp_chroma(XImage *img, double parameters[8], struct lock *lock)
+filter_vhs_warp_chroma(XImage *img, EffectParams *p, struct lock *lock)
 {
 	static VHSRegion region = { .initialized = 0 };
 
@@ -19,10 +19,10 @@ filter_vhs_warp_chroma(XImage *img, double parameters[8], struct lock *lock)
 
 	if (bpp < 3) return; /* need RGB */
 
-	int height = (int)parameters[0];
-	int max_shift = (int)parameters[1];
-	int min_length = (int)parameters[2];
-	int chroma_shift = (parameters[3] > 0.5);
+	int height = (int)p->parameters[0];
+	int max_shift = (int)p->parameters[1];
+	int min_length = (int)p->parameters[2];
+	int chroma_shift = (p->parameters[3] > 0.5);
 
 	/* Pick region once and persist across calls */
 	if (!region.initialized) {
@@ -98,9 +98,9 @@ filter_vhs_warp_chroma(XImage *img, double parameters[8], struct lock *lock)
 }
 
 void
-filter_vhs_jitter(XImage *img, double parameters[8], struct lock *lock)
+filter_vhs_jitter(XImage *img, EffectParams *p, struct lock *lock)
 {
-	int max_offset = (int)parameters[0];
+	int max_offset = (int)p->parameters[0];
 	int height = img->height;
 	int stride = img->bytes_per_line;
 	uint8_t *data = (uint8_t *)img->data;

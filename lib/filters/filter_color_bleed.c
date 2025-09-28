@@ -1,13 +1,13 @@
 void
-filter_color_bleed(XImage *img, double parameters[8], struct lock *lock)
+filter_color_bleed(XImage *img, EffectParams *p, struct lock *lock)
 {
 	if (!img || !img->data) return;
 	int bpp = img->bits_per_pixel / 8;
 	if (bpp < 3) return;
 	int stride = img->bytes_per_line;
 
-	int radius = (int)parameters[0]; /* bleed radius */
-	double strength = parameters[1]; /* how much to blend */
+	int radius = (int)p->parameters[0]; /* bleed radius */
+	double strength = p->parameters[1]; /* how much to blend */
 
 	uint8_t *rowbuf = malloc(stride);
 	if (!rowbuf) return;

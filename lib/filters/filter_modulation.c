@@ -1,12 +1,12 @@
 void
-filter_modulation_glitch(XImage *img, double parameters[8], struct lock *lock)
+filter_modulation_glitch(XImage *img, EffectParams *p, struct lock *lock)
 {
 	if (!img || !img->data) return;
 
-	int intensity   = (parameters[0] > 0) ? (int)parameters[0] : 10;   /* max horizontal jitter in px */
-	double color_mod = (parameters[1] > 0) ? parameters[1] : 0.2;      /* color modulation strength (0..1) */
-	double noise_prob = (parameters[2] > 0) ? parameters[2] : 0.01;    /* chance of random noise per pixel */
-	int chroma_sep   = (parameters[3] > 0.5);                          /* enable channel separation if nonzero */
+	int intensity   = (p->parameters[0] > 0) ? (int)p->parameters[0] : 10;   /* max horizontal jitter in px */
+	double color_mod = (p->parameters[1] > 0) ? p->parameters[1] : 0.2;      /* color modulation strength (0..1) */
+	double noise_prob = (p->parameters[2] > 0) ? p->parameters[2] : 0.01;    /* chance of random noise per pixel */
+	int chroma_sep   = (p->parameters[3] > 0.5);                             /* enable channel separation if nonzero */
 
 	int bpp = img->bits_per_pixel / 8;
 	if (bpp < 3) return;

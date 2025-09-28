@@ -15,13 +15,13 @@
  *          left untouched.
 */
 void
-filter_grayscale(XImage *img, double parameters[8], struct lock *lock)
+filter_grayscale(XImage *img, EffectParams *p, struct lock *lock)
 {
 	int x, y;
 
-	float red_coefficient = (float)(parameters[0] ? parameters[0] : 0.299f);
-	float green_coefficient = (float)(parameters[1] ? parameters[1] : 0.587f);
-	float blue_coefficient = (float)(parameters[2] ? parameters[2] : 0.114f);
+	float red_coefficient = (float)(p->parameters[0] ? p->parameters[0] : 0.299f);
+	float green_coefficient = (float)(p->parameters[1] ? p->parameters[1] : 0.587f);
+	float blue_coefficient = (float)(p->parameters[2] ? p->parameters[2] : 0.114f);
 
 	if (!img)
 		return;

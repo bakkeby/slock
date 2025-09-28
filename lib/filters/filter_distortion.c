@@ -1,14 +1,14 @@
 void
-filter_wave_distortion(XImage *img, double parameters[8], struct lock *lock)
+filter_wave_distortion(XImage *img, EffectParams *p, struct lock *lock)
 {
 	if (!img || !img->data) return;
 	int bpp = img->bits_per_pixel / 8;
 	if (bpp < 3) return;
 	int stride = img->bytes_per_line;
 
-	double amplitude = parameters[0]; /* max horizontal shift */
-	double frequency = parameters[1]; /* wave frequency */
-	double phase = parameters[2];     /* phase offset */
+	double amplitude = p->parameters[0]; /* max horizontal shift */
+	double frequency = p->parameters[1]; /* wave frequency */
+	double phase = p->parameters[2];     /* phase offset */
 
 	uint8_t *rowbuf = malloc(stride);
 	if (!rowbuf) return;

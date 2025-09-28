@@ -1,10 +1,10 @@
 void
-filter_posterize(XImage *img, double parameters[8], struct lock *lock)
+filter_posterize(XImage *img, EffectParams *p, struct lock *lock)
 {
-	int bits = (int)parameters[0];
-	int affect_r = (int)parameters[1];
-	int affect_g = (int)parameters[2];
-	int affect_b = (int)parameters[3];
+	int bits = (int)p->parameters[0];
+	int affect_r = (int)p->parameters[1];
+	int affect_g = (int)p->parameters[2];
+	int affect_b = (int)p->parameters[3];
 
 	if (!img || !img->data) return;
 	if (bits < 1) bits = 1;

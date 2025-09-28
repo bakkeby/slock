@@ -1,13 +1,13 @@
 void
-filter_chroma_crawl(XImage *img, double parameters[8], struct lock *lock)
+filter_chroma_crawl(XImage *img, EffectParams *p, struct lock *lock)
 {
 	if (!img || !img->data) return;
 	int bpp = img->bits_per_pixel / 8;
 	if (bpp < 3) return;
 	int stride = img->bytes_per_line;
 
-	double freq = parameters[0];   /* frequency of oscillation */
-	double amp  = parameters[1];   /* strength of modulation */
+	double freq = p->parameters[0];   /* frequency of oscillation */
+	double amp  = p->parameters[1];   /* strength of modulation */
 
 	for (int y = 0; y < img->height; y++) {
 		uint8_t *row = (uint8_t*)img->data + y * stride;
@@ -27,17 +27,17 @@ filter_chroma_crawl(XImage *img, double parameters[8], struct lock *lock)
 }
 
 void
-filter_chroma_drift(XImage *img, double parameters[8], struct lock *lock)
+filter_chroma_drift(XImage *img, EffectParams *p, struct lock *lock)
 {
 	if (!img || !img->data) return;
 	int bpp = img->bits_per_pixel / 8;
 	if (bpp < 3) return;
 	int stride = img->bytes_per_line;
 
-	int shift_r = -1 * (int)parameters[0]; /* shift for red   */
-	int shift_g = -1 * (int)parameters[1]; /* shift for green */
-	int shift_b = -1 * (int)parameters[2]; /* shift for blue  */
-	int vertical = (int)parameters[3]; /* 0 = horizontal, 1 = vertical */
+	int shift_r = -1 * (int)p->parameters[0]; /* shift for red   */
+	int shift_g = -1 * (int)p->parameters[1]; /* shift for green */
+	int shift_b = -1 * (int)p->parameters[2]; /* shift for blue  */
+	int vertical = (int)p->parameters[3]; /* 0 = horizontal, 1 = vertical */
 
 	if (vertical) {
 		/* -------- Vertical Drift -------- */

@@ -85,6 +85,7 @@ struct Monitor {
 struct lock {
 	int screen;
 	Window root, win;
+	Display *dpy;
 	Pixmap pmap;
 	Pixmap bgmap;
 	unsigned long colors[NUMCOLS];
@@ -106,30 +107,30 @@ struct xrandr {
 static void
 die(const char *fmt, ...)
 {
-    va_list ap;
-    int saved_errno;
+	va_list ap;
+	int saved_errno;
 
-    saved_errno = errno;
+	saved_errno = errno;
 
-    va_start(ap, fmt);
-    vfprintf(stderr, fmt, ap);
-    va_end(ap);
+	va_start(ap, fmt);
+	vfprintf(stderr, fmt, ap);
+	va_end(ap);
 
-    if (fmt[0] && fmt[strlen(fmt)-1] == ':')
-        fprintf(stderr, " %s", strerror(saved_errno));
-    fputc('\n', stderr);
+	if (fmt[0] && fmt[strlen(fmt)-1] == ':')
+		fprintf(stderr, " %s", strerror(saved_errno));
+	fputc('\n', stderr);
 
-    exit(1);
+	exit(1);
 }
 
 void *
 ecalloc(size_t nmemb, size_t size)
 {
-    void *p;
+	void *p;
 
-    if (!(p = calloc(nmemb, size)))
-        die("calloc:");
-    return p;
+	if (!(p = calloc(nmemb, size)))
+		die("calloc:");
+	return p;
 }
 
 #include "lib/include.c"
@@ -153,7 +154,7 @@ dontkillme(void)
 	if (fclose(f)) {
 		if (errno == EACCES)
 			die("slock: unable to disable OOM killer. "
-			    "Make sure to suid or sgid slock.\n");
+				"Make sure to suid or sgid slock.\n");
 		else
 			die("slock: fclose %s: %s\n", oomfile, strerror(errno));
 	}
@@ -181,7 +182,7 @@ gethash(void)
 		struct spwd *sp;
 		if (!(sp = getspnam(pw->pw_name)))
 			die("slock: getspnam: cannot retrieve shadow entry. "
-			    "Make sure to suid or sgid slock.\n");
+				"Make sure to suid or sgid slock.\n");
 		hash = sp->sp_pwdp;
 	}
 #else
@@ -189,11 +190,11 @@ gethash(void)
 #ifdef __OpenBSD__
 		if (!(pw = getpwuid_shadow(getuid())))
 			die("slock: getpwnam_shadow: cannot retrieve shadow entry. "
-			    "Make sure to suid or sgid slock.\n");
+				"Make sure to suid or sgid slock.\n");
 		hash = pw->pw_passwd;
 #else
 		die("slock: getpwuid: cannot retrieve shadow entry. "
-		    "Make sure to suid or sgid slock.\n");
+			"Make sure to suid or sgid slock.\n");
 #endif /* __OpenBSD__ */
 	}
 #endif /* HAVE_SHADOW_H */
@@ -244,10 +245,10 @@ readpw(Display *dpy, struct xrandr *rr, struct lock **locks, int nscreens, const
 					ksym = (ksym - XK_KP_0) + XK_0;
 			}
 			if (IsFunctionKey(ksym) ||
-			    IsKeypadKey(ksym) ||
-			    IsMiscFunctionKey(ksym) ||
-			    IsPFKey(ksym) ||
-			    IsPrivateKeypadKey(ksym))
+				IsKeypadKey(ksym) ||
+				IsMiscFunctionKey(ksym) ||
+				IsPFKey(ksym) ||
+				IsPrivateKeypadKey(ksym))
 				continue;
 			if (enabled(TerminalKeys) && ev.xkey.state & ControlMask) {
 				switch (ksym) {
@@ -351,7 +352,7 @@ readpw(Display *dpy, struct xrandr *rr, struct lock **locks, int nscreens, const
 					continue;
 
 				if (num && !iscntrl((int)buf[0]) &&
-				    (len + num < sizeof(passwd)))
+					(len + num < sizeof(passwd)))
 				{
 					memcpy(passwd + len, buf, num);
 					len += num;
@@ -374,7 +375,7 @@ readpw(Display *dpy, struct xrandr *rr, struct lock **locks, int nscreens, const
 					lock = locks[screen];
 					for (i = 0; i < num_failure_filters; i++) {
 						if (failure_filters[i].func) {
-							failure_filters[i].func(image, failure_filters[i].parameters, lock);
+							failure_filters[i].func(image, &failure_filters[i], lock);
 						}
 					}
 					XShmPutImage(dpy, lock->bgmap, lock->gc, image, 0, 0, 0, 0, lock->x, lock->y, False);
@@ -388,12 +389,12 @@ readpw(Display *dpy, struct xrandr *rr, struct lock **locks, int nscreens, const
 			for (screen = 0; screen < nscreens; screen++) {
 				if (locks[screen]->win == rre->window) {
 					if (rre->rotation == RR_Rotate_90 ||
-					    rre->rotation == RR_Rotate_270)
+						rre->rotation == RR_Rotate_270)
 						XResizeWindow(dpy, locks[screen]->win,
-						              rre->height, rre->width);
+									  rre->height, rre->width);
 					else
 						XResizeWindow(dpy, locks[screen]->win,
-						              rre->width, rre->height);
+									  rre->width, rre->height);
 					XClearWindow(dpy, locks[screen]->win);
 					break;
 				}
@@ -429,7 +430,7 @@ lockscreen(Display *dpy, struct xrandr *rr, int screen)
 
 	for (i = 0; i < NUMCOLS; i++) {
 		XAllocNamedColor(dpy, DefaultColormap(dpy, lock->screen),
-		                 colorname[i], &color, &dummy);
+						 colorname[i], &color, &dummy);
 		lock->colors[i] = color.pixel;
 	}
 
@@ -443,9 +444,9 @@ lockscreen(Display *dpy, struct xrandr *rr, int screen)
 			/* Identify unique monitors */
 			for (m = mons; m && m->next; m = m->next) {
 				if (m->mx == info[i].x_org &&
-				    m->my == info[i].y_org &&
-				    m->mw == info[i].width &&
-				    m->mh == info[i].height
+					m->my == info[i].y_org &&
+					m->mw == info[i].width &&
+					m->mh == info[i].height
 				) {
 					unique = 0;
 					break;
@@ -477,7 +478,7 @@ lockscreen(Display *dpy, struct xrandr *rr, int screen)
 	}
 
 	lock->m = mons;
-
+	lock->dpy = dpy;
 	lock->drawable = XCreatePixmap(dpy, lock->root, lock->x, lock->y, DefaultDepth(dpy, screen));
 	lock->gc = XCreateGC(dpy, lock->root, 0, NULL);
 	XSetLineAttributes(dpy, lock->gc, 1, LineSolid, CapButt, JoinMiter);
@@ -486,12 +487,12 @@ lockscreen(Display *dpy, struct xrandr *rr, int screen)
 	/* init */
 	wa.override_redirect = 1;
 	lock->win = XCreateWindow(dpy, lock->root, 0, 0,
-	                          lock->x,
-	                          lock->y,
-	                          0, DefaultDepth(dpy, lock->screen),
-	                          CopyFromParent,
-	                          DefaultVisual(dpy, lock->screen),
-	                          CWOverrideRedirect, &wa);
+							  lock->x,
+							  lock->y,
+							  0, DefaultDepth(dpy, lock->screen),
+							  CopyFromParent,
+							  DefaultVisual(dpy, lock->screen),
+							  CWOverrideRedirect, &wa);
 
 	XClassHint ch = {"slock", "slock"};
 	XSetClassHint(dpy, lock->win, &ch);
@@ -501,22 +502,22 @@ lockscreen(Display *dpy, struct xrandr *rr, int screen)
 
 	lock->pmap = XCreateBitmapFromData(dpy, lock->win, curs, 8, 8);
 	invisible = XCreatePixmapCursor(dpy, lock->pmap, lock->pmap,
-	                                &color, &color, 0, 0);
+									&color, &color, 0, 0);
 	XDefineCursor(dpy, lock->win, invisible);
 
 	/* Try to grab mouse pointer *and* keyboard for 600ms, else fail the lock */
 	for (i = 0, ptgrab = kbgrab = -1; i < 6; i++) {
 		if (ptgrab != GrabSuccess) {
 			ptgrab = XGrabPointer(dpy, lock->root, False,
-			                      ButtonPressMask | ButtonReleaseMask |
-			                      PointerMotionMask, GrabModeAsync,
-			                      GrabModeAsync, None,
-			                      enabled(UnlockedScreen) ? None : invisible,
-			                      CurrentTime);
+								  ButtonPressMask | ButtonReleaseMask |
+								  PointerMotionMask, GrabModeAsync,
+								  GrabModeAsync, None,
+								  enabled(UnlockedScreen) ? None : invisible,
+								  CurrentTime);
 		}
 		if (kbgrab != GrabSuccess) {
 			kbgrab = XGrabKeyboard(dpy, lock->root, True,
-			                       GrabModeAsync, GrabModeAsync, CurrentTime);
+								   GrabModeAsync, GrabModeAsync, CurrentTime);
 		}
 
 		/* input is grabbed: we can lock the screen */
@@ -540,7 +541,7 @@ lockscreen(Display *dpy, struct xrandr *rr, int screen)
 
 		/* retry on AlreadyGrabbed but fail on other errors */
 		if ((ptgrab != AlreadyGrabbed && ptgrab != GrabSuccess) ||
-		    (kbgrab != AlreadyGrabbed && kbgrab != GrabSuccess))
+			(kbgrab != AlreadyGrabbed && kbgrab != GrabSuccess))
 			break;
 
 		usleep(100000);
@@ -549,10 +550,10 @@ lockscreen(Display *dpy, struct xrandr *rr, int screen)
 	/* we couldn't grab all input: fail out */
 	if (ptgrab != GrabSuccess)
 		fprintf(stderr, "slock: unable to grab mouse pointer for screen %d\n",
-		        screen);
+				screen);
 	if (kbgrab != GrabSuccess)
 		fprintf(stderr, "slock: unable to grab keyboard for screen %d\n",
-		        screen);
+				screen);
 	return NULL;
 }
 
@@ -591,12 +592,12 @@ main(int argc, char **argv) {
 	errno = 0;
 	if (!(pwd = getpwnam(user)))
 		die("slock: getpwnam %s: %s\n", user,
-		    errno ? strerror(errno) : "user entry not found");
+			errno ? strerror(errno) : "user entry not found");
 	duid = pwd->pw_uid;
 	errno = 0;
 	if (!(grp = getgrnam(group)))
 		die("slock: getgrnam %s: %s\n", group,
-		    errno ? strerror(errno) : "group entry not found");
+			errno ? strerror(errno) : "group entry not found");
 	dgid = grp->gr_gid;
 
 #ifdef __linux__
@@ -675,7 +676,7 @@ main(int argc, char **argv) {
 		int err = posix_spawnp(&pid, argv[0], NULL, NULL, argv, environ);
 		if (err) {
 			die("slock: failed to execute post-lock command: %s: %s\n",
-			    argv[0], strerror(err));
+				argv[0], strerror(err));
 		}
 	}
 

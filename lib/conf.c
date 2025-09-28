@@ -1,18 +1,17 @@
 #include <libconfig.h>
+#include <libgen.h>
 
 #define DIR_MAX 4080
 #define PATH_MAX 4096
 const char *progname = "slock";
+static char *cfg_filename = "slock.cfg";
 
 static char *user = NULL;
 static char *group = NULL;
 static char **colorname = NULL;
-static char *background_image = NULL;
-static EffectFilter *background_filters = NULL;
-static EffectFilter *feedback_filters = NULL;
-static EffectFilter *failure_filters = NULL;
-static int background_pixel_size = 0;
-static int background_blur_radius = 0;
+static EffectParams *background_filters = NULL;
+static EffectParams *feedback_filters = NULL;
+static EffectParams *failure_filters = NULL;
 static ResourcePref *resources = NULL;
 uint64_t settings = 0;
 static int num_resources = 0;
@@ -69,7 +68,7 @@ static void load_keypress_feedback(config_t *cfg);
 static void load_logo(config_t *cfg);
 static void load_on_failure(config_t *cfg);
 static void load_secret_commands(config_t *cfg);
-static void load_filters(config_setting_t *filters_t, int *num_filters, EffectFilter **filters);
+static void load_filters(config_setting_t *filters_t, int *num_filters, EffectParams **filter_params);
 
 static FilterFunc *parse_effect_filter(const char *name);
 static void generate_resource_strings(void);
@@ -83,18 +82,24 @@ int startswith(const char *needle, const char *haystack)
 void
 set_config_path(const char* filename, char *config_path, char *config_file)
 {
-	const char *xdg_config_home = getenv("XDG_CONFIG_HOME");
-	const char *home = getenv("HOME");
+    const char *xdg_config_home = getenv("XDG_CONFIG_HOME");
+    const char *home = getenv("HOME");
 
-	if (xdg_config_home && xdg_config_home[0] != '\0') {
-		snprintf(config_path, DIR_MAX, "%s/%s/", xdg_config_home, progname);
-	} else if (home) {
-		snprintf(config_path, DIR_MAX, "%s/.config/%s/", home, progname);
-	} else {
-		return;
-	}
+    if (startswith("/", filename)) {
+        char *dname = strdup(filename);
+        snprintf(config_path, PATH_MAX, "%s", dirname(dname));
+        snprintf(config_file, PATH_MAX, "%s", filename);
+        free(dname);
+        return;
+    }
 
-	snprintf(config_file, PATH_MAX, "%s/%s.cfg", config_path, filename);
+    if (xdg_config_home && xdg_config_home[0] != '\0') {
+        snprintf(config_path, PATH_MAX, "%s/%s", xdg_config_home, progname);
+        snprintf(config_file, PATH_MAX, "%s/%s", config_path, filename);
+    } else if (home) {
+        snprintf(config_path, PATH_MAX, "%s/.config/%s", home, progname);
+        snprintf(config_file, PATH_MAX, "%s/%s", config_path, filename);
+    }
 }
 
 void
@@ -104,7 +109,10 @@ load_config(void)
 	char config_path[DIR_MAX] = {0};
 	char config_file[PATH_MAX] = {0};
 
-	set_config_path(progname, config_path, config_file);
+	const char *envcfg = getenv("SLOCK_CONFIG_PATH");
+	const char *filename = (envcfg && strlen(envcfg) ? envcfg : cfg_filename);
+
+	set_config_path(filename, config_path, config_file);
 	config_init(&cfg);
 	config_set_include_dir(&cfg, config_path);
 
@@ -278,9 +286,6 @@ load_logo(config_t *cfg)
 void
 load_background(config_t *cfg)
 {
-	config_lookup_strdup(cfg, "background.image", &background_image);
-	config_lookup_int(cfg, "background.pixel_size", &background_pixel_size);
-	config_lookup_int(cfg, "background.blur_radius", &background_blur_radius);
 	load_filters(config_lookup(cfg, "background.filters"), &num_background_filters, &background_filters);
 }
 
@@ -300,18 +305,18 @@ load_on_failure(config_t *cfg)
 }
 
 void
-load_filters(config_setting_t *filters_t, int *num_filters, EffectFilter **filters)
+load_filters(config_setting_t *filters_t, int *num_filters, EffectParams **filters)
 {
 	int i, p, num_params;
 
 	const char *string;
-	const config_setting_t *filter_t, *params_t;
+	const config_setting_t *filter_t, *params_t, *param_t;
 
 	if (!filters_t || !config_setting_is_list(filters_t))
 		return;
 
 	*num_filters = config_setting_length(filters_t);
-	*filters = calloc(*num_filters, sizeof(EffectFilter));
+	*filters = calloc(*num_filters, sizeof(EffectParams));
 
 	for (i = 0; i < *num_filters; i++) {
 		filter_t = config_setting_get_elem(filters_t, i);
@@ -324,9 +329,32 @@ load_filters(config_setting_t *filters_t, int *num_filters, EffectFilter **filte
 			continue;
 
 		num_params = setting_length(params_t);
-		for (p = 0; p < num_params && p < 8; p++) {
+		int str_count = 0;
 
-			(*filters)[i].parameters[p] = setting_get_float_elem(params_t, p);
+		/* First pass: count strings */
+		for (p = 0; p < num_params; p++) {
+			param_t = config_setting_get_elem(params_t, p);
+			if (config_setting_type(param_t) == CONFIG_TYPE_STRING &&
+					!config_setting_parse_float_string(param_t))
+				str_count++;
+		}
+
+		if (str_count > 0) {
+			(*filters)[i].string_parameters = calloc(str_count, sizeof(char *));
+			(*filters)[i].num_string_parameters = str_count;
+		}
+
+		/* Second pass: assign values */
+		int str_index = 0;
+		for (p = 0; p < num_params && p < 8; p++) {
+			param_t = config_setting_get_elem(params_t, p);
+			if (config_setting_type(param_t) == CONFIG_TYPE_STRING &&
+					!config_setting_parse_float_string(param_t)) {
+				string = config_setting_get_string(param_t);
+				(*filters)[i].string_parameters[str_index++] = strdup(string);
+			} else {
+				(*filters)[i].parameters[p] = setting_get_float_elem(params_t, p);
+			}
 		}
 	}
 }

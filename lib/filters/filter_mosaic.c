@@ -12,7 +12,7 @@
  *      filter_mosaic(img, p);
  */
 
-void filter_mosaic(XImage *img, double parameters[8], struct lock *lock)
+void filter_mosaic(XImage *img, EffectParams *p, struct lock *lock)
 {
 	if (!img || !img->data) return;
 
@@ -20,8 +20,8 @@ void filter_mosaic(XImage *img, double parameters[8], struct lock *lock)
 	 *  Parameter handling – fall back to sensible defaults if the
 	 *  caller supplies non‑positive values.
 	 * ------------------------------------------------------------- */
-	int tile_w = (int)(parameters[0] > 0 ? parameters[0] : 8);
-	int tile_h = (int)(parameters[1] > 0 ? parameters[1] : 8);
+	int tile_w = (int)(p->parameters[0] > 0 ? p->parameters[0] : 8);
+	int tile_h = (int)(p->parameters[1] > 0 ? p->parameters[1] : 8);
 	int red_mask_shift = 1;
 	int green_mask_shift = 1;
 	int blue_mask_shift = 1;

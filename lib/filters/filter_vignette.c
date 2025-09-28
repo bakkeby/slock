@@ -1,6 +1,6 @@
 /* Rounded-rectangle style vignette for any aspect ratio */
 void
-filter_vignette(XImage *img, double parameters[8], struct lock *lock)
+filter_vignette(XImage *img, EffectParams *p, struct lock *lock)
 {
 	if (!img || !img->data || !lock) return;
 
@@ -10,11 +10,11 @@ filter_vignette(XImage *img, double parameters[8], struct lock *lock)
 	if (bpp < 3) return;
 	int stride = img->bytes_per_line;
 
-	double strength    = (parameters[0] != 0.0) ? parameters[0] : 0.5; // overall vignette strength
-	double edge_frac_x = (parameters[1] != 0.0) ? parameters[1] : 0.1; // horizontal edge fraction
-	double edge_frac_y = (parameters[2] != 0.0) ? parameters[2] : 0.1; // vertical edge fraction
-	double corner_r    = (parameters[3] != 0.0) ? parameters[3] : 50.0; // corner radius
-	double falloff     = (parameters[4] != 0.0) ? parameters[4] : 2.0;  // smoothness exponent
+	double strength    = (p->parameters[0] != 0.0) ? p->parameters[0] : 0.5; // overall vignette strength
+	double edge_frac_x = (p->parameters[1] != 0.0) ? p->parameters[1] : 0.1; // horizontal edge fraction
+	double edge_frac_y = (p->parameters[2] != 0.0) ? p->parameters[2] : 0.1; // vertical edge fraction
+	double corner_r    = (p->parameters[3] != 0.0) ? p->parameters[3] : 50.0; // corner radius
+	double falloff     = (p->parameters[4] != 0.0) ? p->parameters[4] : 2.0;  // smoothness exponent
 
 	for (m = lock->m; m; m = m->next) {
 		mx = m->mx;

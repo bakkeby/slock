@@ -1,10 +1,10 @@
 void
-filter_film_grain(XImage *img, double parameters[8], struct lock *lock)
+filter_film_grain(XImage *img, EffectParams *p, struct lock *lock)
 {
     if (!img || !img->data)
         return;
 
-    int strength = (int)parameters[0];
+    int strength = (int)p->parameters[0];
 
     /* bytes per pixel (assuming 24/32 bpp TrueColor) */
     int bpp = img->bits_per_pixel / 8;

@@ -6,13 +6,13 @@
  *                 1.0 = no change
  * ---------------------------------------------------------------------- */
 void
-filter_brightness(XImage *img, double parameters[8], struct lock *lock)
+filter_brightness(XImage *img, EffectParams *p, struct lock *lock)
 {
 	if (!img || !img->data || !lock || !lock->m)
 		return;
 
 	Monitor *m;
-	double offset = parameters[0]; /* range: -255..255 */
+	double offset = p->parameters[0]; /* range: -255..255 */
 	int bpp = (img->bits_per_pixel + 7) / 8;
 	int stride = img->bytes_per_line;
 

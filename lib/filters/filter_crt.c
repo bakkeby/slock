@@ -1,14 +1,14 @@
 void
-filter_crt_effect(XImage *img, double parameters[8], struct lock *lock)
+filter_crt_effect(XImage *img, EffectParams *p, struct lock *lock)
 {
 	if (!img || !img->data) return;
 
 	/* Parameters */
-	double scanline_intensity = (parameters[0] > 0) ? parameters[0] : 0.3; /* 0.0–1.0 */
-	double flicker_strength   = (parameters[1] > 0) ? parameters[1] : 0.05; /* 0.0–0.2 */
-	int phosphor_stripes      = (parameters[2] > 0.5); /* 0 = off, 1 = on */
-	int invert_stripes        = (parameters[3] > 0.5); /* shift stripe order */
-	double glow_intensity     = (parameters[4] > 0) ? parameters[4] : 0.25; /* 0.0–1.0 */
+	double scanline_intensity = (p->parameters[0] > 0) ? p->parameters[0] : 0.3; /* 0.0–1.0 */
+	double flicker_strength   = (p->parameters[1] > 0) ? p->parameters[1] : 0.05; /* 0.0–0.2 */
+	int phosphor_stripes      = (p->parameters[2] > 0.5); /* 0 = off, 1 = on */
+	int invert_stripes        = (p->parameters[3] > 0.5); /* shift stripe order */
+	double glow_intensity     = (p->parameters[4] > 0) ? p->parameters[4] : 0.25; /* 0.0–1.0 */
 
 	int bpp = img->bits_per_pixel / 8;
 	if (bpp < 3) return;

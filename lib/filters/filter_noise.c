@@ -1,19 +1,11 @@
 void
-filter_noise(XImage *img, double parameters[8], struct lock *lock)
+filter_noise(XImage *img, EffectParams *p, struct lock *lock)
 {
-	double amount = parameters[0];
+	double amount = p->parameters[0];
 
 	if (!img) return;
 	if (amount <= 0.0) return;          /* nothing to do */
 	if (amount > 1.0) amount = 1.0;     /* clamp */
-
-	/* Seed the PRNG once – you can move this elsewhere if you
-	   already seed your program. */
-	static int seeded = 0;
-	if (!seeded) {
-		srand((unsigned)time(NULL));
-		seeded = 1;
-	}
 
 	/* Bytes per pixel – works for 24‑bpp (3) and 32‑bpp (4). */
 	int bpp = img->bits_per_pixel / 8;
@@ -46,11 +38,11 @@ filter_noise(XImage *img, double parameters[8], struct lock *lock)
 }
 
 void
-filter_soft_noise(XImage *img, double parameters[8], struct lock *lock)
+filter_soft_noise(XImage *img, EffectParams *p, struct lock *lock)
 {
-	double amount = parameters[0];
-	double strength = parameters[1];
-	int blur_radius = (int)parameters[2];
+	double amount = p->parameters[0];
+	double strength = p->parameters[1];
+	int blur_radius = (int)p->parameters[2];
 
 	if (!img) return;
 	if (amount <= 0.0) return;
@@ -59,16 +51,7 @@ filter_soft_noise(XImage *img, double parameters[8], struct lock *lock)
 	if (blur_radius < 0) blur_radius = 0;
 
 	/* ---------------------------------------------------------
-	   1.  Initialise PRNG (once per process)
-	   --------------------------------------------------------- */
-	static int seeded = 0;
-	if (!seeded) {
-		srand((unsigned)time(NULL));
-		seeded = 1;
-	}
-
-	/* ---------------------------------------------------------
-	   2.  Determine bytes‑per‑pixel (works for 24‑ and 32‑bpp)
+	   Determine bytes‑per‑pixel (works for 24‑ and 32‑bpp)
 	   --------------------------------------------------------- */
 	int bpp = img->bits_per_pixel / 8;
 	if (bpp == 0) bpp = 4;                 /* safety fallback */
@@ -78,9 +61,9 @@ filter_soft_noise(XImage *img, double parameters[8], struct lock *lock)
 	if (n_noise == 0) n_noise = 1;         /* at least one pixel */
 
 	/* ---------------------------------------------------------
-	   3.  Add noise – each affected pixel receives a colour
-		   that is a weighted blend of its original value and a
-		   random offset limited by `strength`.
+	   Add noise – each affected pixel receives a colour
+	   that is a weighted blend of its original value and a
+	   random offset limited by `strength`.
 	   --------------------------------------------------------- */
 	for (long i = 0; i < n_noise; ++i) {
 		int x = rand() % img->width;
@@ -105,9 +88,9 @@ filter_soft_noise(XImage *img, double parameters[8], struct lock *lock)
 	}
 
 	/* ---------------------------------------------------------
-	   4.  Optional box‑blur to smooth the high‑frequency spikes.
-		   We implement a separable blur (horizontal then vertical)
-		   because it is O(width·height·radius) instead of O(N²).
+	   Optional box‑blur to smooth the high‑frequency spikes.
+	   We implement a separable blur (horizontal then vertical)
+	   because it is O(width·height·radius) instead of O(N²).
 	   --------------------------------------------------------- */
 	if (blur_radius > 0) {
 		/* Allocate a temporary buffer the size of the image */

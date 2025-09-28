@@ -1,11 +1,12 @@
 /* Allocate backing buffer for an XImage and fill with a solid pixel value */
 void
-filter_solid_color(XImage *img, double parameters[8], struct lock *lock)
+filter_solid_color(XImage *img, EffectParams *p, struct lock *lock)
 {
 	if (!img)
 		return;
 
-	unsigned long pixel = lock->colors[CLAMP((int)parameters[0], 0, NUMCOLS - 1)];
+	int color_idx = CLAMP((int)p->parameters[0], 0, NUMCOLS - 1);
+	unsigned long pixel = lock->colors[color_idx];
 
 	/* Allocate data if needed */
 	if (!img->data) {

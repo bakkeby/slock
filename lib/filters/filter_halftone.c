@@ -9,18 +9,18 @@
  * parameters[5] = pattern (0=circle, 1=line, 2=diamond)
  * ---------------------------------------------------------------------- */
 void
-filter_halftone(XImage *img, double parameters[8], struct lock *lock)
+filter_halftone(XImage *img, EffectParams *p, struct lock *lock)
 {
-	int period   = (parameters[0] > 0) ? (int)parameters[0] : 8;
-	double angle = parameters[1];
-	int invert   = (parameters[2] > 0.5) ? 1 : 0;
-	double blend = parameters[3];
+	int period   = (p->parameters[0] > 0) ? (int)p->parameters[0] : 8;
+	double angle = p->parameters[1];
+	int invert   = (p->parameters[2] > 0.5) ? 1 : 0;
+	double blend = p->parameters[3];
 	if (blend < 0.0) blend = 0.0;
 	if (blend > 1.0) blend = 1.0;
-	double jitter = parameters[4];
+	double jitter = p->parameters[4];
 	if (jitter < 0.0) jitter = 0.0;
 	if (jitter > 1.0) jitter = 1.0;
-	int pattern = (parameters[5] >= 0 && parameters[5] <= 2) ? (int)parameters[5] : 0;
+	int pattern = (p->parameters[5] >= 0 && p->parameters[5] <= 2) ? (int)p->parameters[5] : 0;
 
 	double radians = angle * M_PI / 180.0;
 	double cos_a = cos(radians);
@@ -29,9 +29,6 @@ filter_halftone(XImage *img, double parameters[8], struct lock *lock)
 	Monitor *m;
 	int bpp = img->bits_per_pixel / 8;
 	int stride = img->bytes_per_line;
-
-	static int seeded = 0;
-	if (!seeded) { srand((unsigned)time(NULL)); seeded = 1; }
 
 	for (m = lock->m; m; m = m->next) {
 		for (int y = m->my; y < m->my + m->mh; y++) {

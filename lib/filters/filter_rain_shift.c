@@ -6,20 +6,14 @@
    top.  The operation is performed in‑place on the XImage.
    ------------------------------------------------------------- */
 void
-filter_rain_shift_vert(XImage *img, double parameters[8], struct lock *lock)
+filter_rain_shift_vert(XImage *img, EffectParams *p, struct lock *lock)
 {
-	int max_shift = (int)parameters[0];
+	int max_shift = (int)p->parameters[0];
 
 	if (!img || max_shift <= 0)
 		return;
 
 	Monitor *m;
-	static int seeded = 0;
-	if (!seeded) {
-		srand((unsigned)time(NULL));
-		seeded = 1;
-	}
-
 	int bpp = img->bits_per_pixel / 8;          /* bytes per pixel */
 	if (bpp == 0) bpp = 4;                      /* safety fallback */
 
@@ -60,20 +54,14 @@ filter_rain_shift_vert(XImage *img, double parameters[8], struct lock *lock)
    XImage.
    ------------------------------------------------------------- */
 void
-filter_rain_shift_horz(XImage *img, double parameters[8], struct lock *lock)
+filter_rain_shift_horz(XImage *img, EffectParams *p, struct lock *lock)
 {
-	int max_shift = (int)parameters[0];
+	int max_shift = (int)p->parameters[0];
 
 	if (!img || max_shift <= 0)
 		return;
 
 	Monitor *m;
-	static int seeded = 0;
-	if (!seeded) {
-		srand((unsigned)time(NULL));
-		seeded = 1;
-	}
-
 	int bpp = img->bits_per_pixel / 8;          /* bytes per pixel */
 	if (bpp == 0) bpp = 4;                      /* safety fallback */
 

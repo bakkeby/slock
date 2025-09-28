@@ -70,14 +70,14 @@ static void hsl_to_rgb(double h, double s, double l,
  * parameters[0] = hue shift in degrees (0–360)
  * ---------------------------------------------------------------------- */
 void
-filter_hue(XImage *img, double parameters[8], struct lock *lock)
+filter_hue(XImage *img, EffectParams *p, struct lock *lock)
 {
 	if (!img || !img->data || !lock || !lock->m)
 		return;
 
 	Monitor *m;
 	/* parameters[0] = hue shift in degrees */
-	double hue_shift = parameters[0] / 360.0; /* normalize */
+	double hue_shift = p->parameters[0] / 360.0; /* normalize */
 	int bpp = (img->bits_per_pixel + 7) / 8;
 	int stride = img->bytes_per_line;
 

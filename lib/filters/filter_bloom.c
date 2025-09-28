@@ -1,5 +1,5 @@
 void
-filter_bloom(XImage *img, double parameters[8], struct lock *lock)
+filter_bloom(XImage *img, EffectParams *p, struct lock *lock)
 {
 	if (!img || !img->data) return;
 
@@ -12,9 +12,9 @@ filter_bloom(XImage *img, double parameters[8], struct lock *lock)
 	 *    1 = blur radius (default 5)
 	 *    2 = intensity (blend factor, 0–1, default 0.9)
 	 */
-	int threshold = (parameters[0] > 0 ? (int)parameters[0] : 100);
-	int radius = (parameters[1] > 0 ? (int)parameters[1] : 5);
-	double intensity = (parameters[2] > 0 ? parameters[2] : 0.9);
+	int threshold = (p->parameters[0] > 0 ? (int)p->parameters[0] : 100);
+	int radius = (p->parameters[1] > 0 ? (int)p->parameters[1] : 5);
+	double intensity = (p->parameters[2] > 0 ? p->parameters[2] : 0.9);
 	if (intensity > 1.0) intensity = 1.0;
 
 	/* Allocate buffer for bright-pass image */

@@ -6,14 +6,14 @@
  * parameters[3] = blend strength (0.0–1.0)
  * ---------------------------------------------------------------------- */
 void
-filter_tint(XImage *img, double parameters[8], struct lock *lock)
+filter_tint(XImage *img, EffectParams *p, struct lock *lock)
 {
 	if (!img || !img->data) return;
 
-	int tint_r = (int)parameters[0];
-	int tint_g = (int)parameters[1];
-	int tint_b = (int)parameters[2];
-	double blend = (parameters[3] >= 0.0 && parameters[3] <= 1.0) ? parameters[3] : 0.5;
+	int tint_r = (int)p->parameters[0];
+	int tint_g = (int)p->parameters[1];
+	int tint_b = (int)p->parameters[2];
+	double blend = (p->parameters[3] >= 0.0 && p->parameters[3] <= 1.0) ? p->parameters[3] : 0.5;
 
 	int bpp    = (img->bits_per_pixel + 7) / 8;
 	int stride = img->bytes_per_line;

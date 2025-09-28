@@ -1,7 +1,9 @@
 #include <X11/extensions/XShm.h>
 #include <sys/ipc.h>
 #include <sys/shm.h>
+#include <sys/stat.h>
 #include <fcntl.h>
+#include <dirent.h>
 #if HAVE_IMLIB
 #include <Imlib2.h>
 #endif
@@ -55,19 +57,10 @@ create_lock_image(Display *dpy, struct lock *lock)
 	/* Background pixmap */
 	lock->bgmap = XCreatePixmap(dpy, lock->win, lock->x, lock->y, DefaultDepth(dpy, lock->screen));
 
-	if (enabled(BackgroundImage) && !load_image_from_file(dpy, lock, background_image)) {
-		/* Fall back to grabbing a screenshot into a client-side XImage
-		 * and copy the data to our shared memory image */
-		XImage *rootimg = XGetImage(dpy, lock->root, 0, 0, lock->x, lock->y, AllPlanes, ZPixmap);
-		memcpy(image->data, rootimg->data,
-		       image->bytes_per_line * image->height);
-		XDestroyImage(rootimg);
-	}
-
 	/* Apply background filters (if any) */
 	for (i = 0; i < num_background_filters; i++) {
 		if (background_filters[i].func) {
-			background_filters[i].func(image, background_filters[i].parameters, lock);
+			background_filters[i].func(image, &background_filters[i], lock);
 		}
 	}
 
@@ -87,8 +80,88 @@ cleanup_lock_image(Display *dpy)
 	XDestroyImage(image);
 }
 
+char *
+random_file_from_dir(const char *dirname)
+{
+	DIR *dir;
+	struct dirent *entry;
+	char **files = NULL;
+	size_t count = 0;
+
+	dir = opendir(dirname);
+	if (!dir) {
+		perror("opendir");
+		return NULL;
+	}
+
+	while ((entry = readdir(dir)) != NULL) {
+		/* skip "." and ".." */
+		if (entry->d_name[0] == '.')
+			continue;
+
+		#if !HAVE_IMLIB
+		if (!strstr(entry->d_name, ".ff"))
+			continue;
+		#endif
+
+		files = realloc(files, sizeof(char*) * (count + 1));
+		files[count] = strdup(entry->d_name);
+		count++;
+	}
+	closedir(dir);
+
+	if (count == 0) {
+		fprintf(stderr, "No image files found in %s\n", dirname);
+		free(files);
+		return NULL;
+	}
+
+	size_t idx = rand() % count;
+
+	char *selected = malloc(strlen(dirname) + strlen(files[idx]) + 2);
+	sprintf(selected, "%s/%s", dirname, files[idx]);
+
+	/* cleanup */
+	for (size_t i = 0; i < count; i++) free(files[i]);
+	free(files);
+
+	return selected;
+}
+
 int
-load_image_from_file(Display *dpy, struct lock *lock, const char *filename)
+load_image_from_string(Display *dpy, Monitor *m, const char *file_or_directory)
+{
+	struct stat statbuf;
+	int ret = 0;
+	char *filename = NULL;
+	char *expanded = expandhome(file_or_directory);
+
+	if (stat(expanded, &statbuf) != 0) {
+		fprintf(stderr, "error: cannot stat %s\n", expanded);
+		goto bail;
+	}
+
+	if (S_ISDIR(statbuf.st_mode)) {
+		/* If a directory is given, then pick a random file */
+		filename = random_file_from_dir(expanded);
+		if (!filename) {
+			fprintf(stderr, "error: no valid files found in %s\n", expanded);
+			goto bail;
+		}
+	} else {
+		filename = strdup(expanded);
+	}
+
+	ret = load_image_from_file(dpy, m, filename);
+	free(filename);
+
+bail:
+	free(expanded);
+	return ret;
+}
+
+int
+load_image_from_file(Display *dpy, Monitor *m, const char *filename)
 {
 	if (!filename || !strlen(filename))
 		return 0;
@@ -105,23 +178,6 @@ load_image_from_file(Display *dpy, struct lock *lock, const char *filename)
 	int width = imlib_image_get_width();
 	int height = imlib_image_get_height();
 
-	/* Create a scaled copy if needed */
-	Imlib_Image scaled = imlib_create_cropped_scaled_image(
-		0, 0, width, height,
-		lock->mw, lock->mh
-	);
-
-	/* Free original if scaled image was created */
-	if (scaled) {
-		imlib_free_image();
-		imlib_context_set_image(scaled);
-		width = lock->mw;
-		height = lock->mh;
-	} else {
-		/* Scaling failed, just use original */
-		scaled = img;
-	}
-
 	uint32_t *data = imlib_image_get_data();
 	if (!data) {
 		fprintf(stderr, "error: imlib2 returned NULL data for %s\n", filename);
@@ -129,23 +185,40 @@ load_image_from_file(Display *dpy, struct lock *lock, const char *filename)
 		return 0;
 	}
 
-	/* Copy imlib2's 32-bit ARGB data into our XImage */
-	for (int y = 0; y < height; y++) {
-		for (int x = 0; x < width; x++) {
-			uint32_t argb = data[y * width + x];
+	/* Determine cropped/centered region, like farbfeld */
+	int draw_w = (width  > m->mw) ? m->mw : width;
+	int draw_h = (height > m->mh) ? m->mh : height;
 
-			/* Imlib2 gives pixels as 0xAARRGGBB (MSB first) */
-			// uint8_t a = (argb >> 24) & 0xFF;
+	int start_x = m->mx + (m->mw - draw_w) / 2;
+	int start_y = m->my + (m->mh - draw_h) / 2;
+
+	int src_x0 = (width  > m->mw) ? (width  - m->mw) / 2 : 0;
+	int src_y0 = (height > m->mh) ? (height - m->mh) / 2 : 0;
+
+	int bpp = image->bits_per_pixel / 8;
+
+	for (int y = 0; y < draw_h; y++) {
+		uint8_t *row = (uint8_t *)image->data + (start_y + y) * image->bytes_per_line;
+		for (int x = 0; x < draw_w; x++) {
+			uint32_t argb = data[(y + src_y0) * width + (x + src_x0)];
+
+			uint8_t a = (argb >> 24) & 0xFF;
 			uint8_t r = (argb >> 16) & 0xFF;
 			uint8_t g = (argb >> 8)  & 0xFF;
 			uint8_t b = (argb)       & 0xFF;
 
-			/* Ignore alpha (or you can blend if you want transparency) */
-			uint32_t pixel = (r << 16) | (g << 8) | b;
+			float alpha = a / 255.0f;
 
-			if (lock->m->mx + x < image->width && lock->m->my + y < image->height) {
-				XPutPixel(image, lock->m->mx + x, lock->m->my + y, pixel);
-			}
+			uint8_t *dst = row + (start_x + x) * bpp;
+
+			uint8_t dst_b = dst[0];
+			uint8_t dst_g = dst[1];
+			uint8_t dst_r = dst[2];
+
+			// blend
+			dst[2] = (uint8_t)(r * alpha + dst_r * (1.0f - alpha));
+			dst[1] = (uint8_t)(g * alpha + dst_g * (1.0f - alpha));
+			dst[0] = (uint8_t)(b * alpha + dst_b * (1.0f - alpha));
 		}
 	}
 
@@ -180,23 +253,47 @@ load_image_from_file(Display *dpy, struct lock *lock, const char *filename)
 	read(fd, ffbuf, pixels * 8);
 	close(fd);
 
-	/* Fill into image->data */
-	for (uint32_t y = 0; y < height; y++) {
-		for (uint32_t x = 0; x < width; x++) {
-			uint8_t *src = ffbuf + (y * width + x) * 8;
+	/* Compute drawable region */
+	uint32_t draw_w = (width  > (uint32_t)m->mw) ? m->mw : width;
+	uint32_t draw_h = (height > (uint32_t)m->mh) ? m->mh : height;
+
+	/* Center in monitor */
+	int start_x = m->mx + (m->mw - draw_w) / 2;
+	int start_y = m->my + (m->mh - draw_h) / 2;
+
+	/* If image is bigger, crop from its center */
+	uint32_t src_x0 = (width  > (uint32_t)m->mw) ? (width  - m->mw) / 2 : 0;
+	uint32_t src_y0 = (height > (uint32_t)m->mh) ? (height - m->mh) / 2 : 0;
+
+	int bpp = image->bits_per_pixel / 8;
+
+	for (uint32_t y = 0; y < draw_h; y++) {
+		uint8_t *row = (uint8_t *)image->data + (start_y + y) * image->bytes_per_line;
+		for (uint32_t x = 0; x < draw_w; x++) {
+			uint8_t *src = ffbuf + ((y + src_y0) * width + (x + src_x0)) * 8;
+
 			uint16_t r16 = (src[0] << 8) | src[1];
 			uint16_t g16 = (src[2] << 8) | src[3];
 			uint16_t b16 = (src[4] << 8) | src[5];
-			// uint16_t a16 = (src[6] << 8) | src[7];  /* alpha ignored unless you do blending */
+			uint16_t a16 = (src[6] << 8) | src[7];
 
 			uint8_t r8 = r16 >> 8;
 			uint8_t g8 = g16 >> 8;
 			uint8_t b8 = b16 >> 8;
-			// uint8_t a8 = a16 >> 8;  /* alpha ignored unless you do blending */
+			uint8_t a8 = a16 >> 8;
 
-			/* Write into image depending on byte order/format */
-			uint32_t pixel = (r8 << 16) | (g8 << 8) | (b8);
-			XPutPixel(image, x + lock->m->mx, y + lock->m->my, pixel);
+			float alpha = a8 / 255.0f;
+
+			uint8_t *dst = row + (start_x + x) * bpp;
+
+			uint8_t dst_b = dst[0];
+			uint8_t dst_g = dst[1];
+			uint8_t dst_r = dst[2];
+
+			/* blend */
+			dst[2] = (uint8_t)(r8 * alpha + dst_r * (1.0f - alpha));
+			dst[1] = (uint8_t)(g8 * alpha + dst_g * (1.0f - alpha));
+			dst[0] = (uint8_t)(b8 * alpha + dst_b * (1.0f - alpha));
 		}
 	}
 	#endif

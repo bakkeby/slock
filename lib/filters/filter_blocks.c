@@ -1,5 +1,5 @@
 void
-filter_random_blocks(XImage *img, double parameters[8], struct lock *lock)
+filter_random_blocks(XImage *img, EffectParams *p, struct lock *lock)
 {
 	if (!img || !img->data)
 		return;
@@ -13,12 +13,12 @@ filter_random_blocks(XImage *img, double parameters[8], struct lock *lock)
 	 */
 
 	unsigned long pixel = lock->colors[caps ? CAPS : BLOCKS];
-	int x_count = parameters[2] > 0 ? (int)parameters[2] : 20 * img->width/img->height;
-	int y_count = parameters[3] > 0 ? (int)parameters[3] : 20;
-	int min_x = (int)parameters[4];
-	int max_x = (int)parameters[5];
-	int min_y = (int)parameters[6];
-	int max_y = (int)parameters[7];
+	int y_count = p->parameters[3] > 0 ? (int)p->parameters[3] : 20;
+	int x_count = p->parameters[2] > 0 ? (int)p->parameters[2] : y_count * img->width/img->height;
+	int min_x = (int)p->parameters[4];
+	int max_x = (int)p->parameters[5];
+	int min_y = (int)p->parameters[6];
+	int max_y = (int)p->parameters[7];
 
 	/* Fall back to showing on the primary screen only */
 	if (!min_y && !max_y && !min_x && !max_x) {
@@ -39,8 +39,8 @@ filter_random_blocks(XImage *img, double parameters[8], struct lock *lock)
 		area_height = max_y - min_y;
 	}
 
-	int block_w = parameters[0] > 0 ? (int)parameters[0] : area_width / x_count;
-	int block_h = parameters[1] > 0 ? (int)parameters[1] : area_height / y_count;
+	int block_w = p->parameters[0] > 0 ? (int)p->parameters[0] : area_width / x_count;
+	int block_h = p->parameters[1] > 0 ? (int)p->parameters[1] : area_height / y_count;
 
 	/* Pick a random position */
 	int x = min_x + rand() % (area_width  - block_w);

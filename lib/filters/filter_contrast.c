@@ -6,13 +6,13 @@
  *                 1.0 = no change
  * ---------------------------------------------------------------------- */
 void
-filter_contrast(XImage *img, double parameters[8], struct lock *lock)
+filter_contrast(XImage *img, EffectParams *p, struct lock *lock)
 {
 	if (!img || !img->data || !lock || !lock->m)
 		return;
 
 	Monitor *m;
-	double factor = parameters[0]; /* e.g. 1.0=no change, >1.0=more contrast */
+	double factor = p->parameters[0]; /* e.g. 1.0=no change, >1.0=more contrast */
 	int bpp = (img->bits_per_pixel + 7) / 8;
 	int stride = img->bytes_per_line;
 

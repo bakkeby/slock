@@ -6,7 +6,7 @@ static const uint64_t
 	KeypressFeedback = 0x10,
 	TurnMonitorOff = 0x20,
 	PAMAuthentication = 0x40,
-	BackgroundImage = 0x80,
+	FuncPlaceholder0x80 = 0x80,
 	FuncPlaceholder0x100 = 0x100,
 	UnlockedScreen = 0x200,
 	AutoTimeout = 0x400,
@@ -74,7 +74,6 @@ struct nv {
 static const struct nv functionality_names[] = {
 	map(Alpha),
 	map(AutoTimeout),
-	map(BackgroundImage),
 	map(ControlClear),
 	map(ExitCommand),
 	map(KeypressFeedback),
@@ -88,7 +87,6 @@ static const struct nv functionality_names[] = {
 };
 
 #undef map
-
 
 int enabled(const uint64_t functionality);
 int disabled(const uint64_t functionality);

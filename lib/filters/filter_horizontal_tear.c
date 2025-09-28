@@ -1,5 +1,5 @@
 void
-filter_horizontal_tear(XImage *img, double parameters[8], struct lock *lock)
+filter_horizontal_tear(XImage *img, EffectParams *p, struct lock *lock)
 {
 	if (!img || !img->data) return;
 
@@ -9,9 +9,9 @@ filter_horizontal_tear(XImage *img, double parameters[8], struct lock *lock)
 	int stride = img->bytes_per_line;
 
 	/* Parameters */
-	int max_shift = (parameters[0] > 0) ? (int)parameters[0] : 30; /* max horizontal shift */
-	double tear_prob = (parameters[1] > 0) ? parameters[1] : 0.02; /* chance per row */
-	int block_size = (parameters[2] > 0) ? (int)parameters[2] : 8; /* tear height in rows */
+	int max_shift = (p->parameters[0] > 0) ? (int)p->parameters[0] : 30; /* max horizontal shift */
+	double tear_prob = (p->parameters[1] > 0) ? p->parameters[1] : 0.02; /* chance per row */
+	int block_size = (p->parameters[2] > 0) ? (int)p->parameters[2] : 8; /* tear height in rows */
 
 	uint8_t *rowbuf = malloc(stride);
 	if (!rowbuf) return;

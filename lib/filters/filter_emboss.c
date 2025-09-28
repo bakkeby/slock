@@ -6,14 +6,14 @@
  * parameters[3] = blend strength (0.0–1.0, 1.0 replaces fully)
  * ---------------------------------------------------------------------- */
 void
-filter_emboss(XImage *img, double parameters[8], struct lock *lock)
+filter_emboss(XImage *img, EffectParams *p, struct lock *lock)
 {
 	if (!img || !img->data) return;
 
-	double intensity = (parameters[0] != 0.0) ? parameters[0] : 1.0;
-	int dx = (parameters[1] != 0.0) ? (int)parameters[1] : 1;
-	int dy = (parameters[2] != 0.0) ? (int)parameters[2] : 1;
-	double blend = (parameters[3] >= 0.0 && parameters[3] <= 1.0) ? parameters[3] : 1.0;
+	double intensity = (p->parameters[0] != 0.0) ? p->parameters[0] : 1.0;
+	int dx = (p->parameters[1] != 0.0) ? (int)p->parameters[1] : 1;
+	int dy = (p->parameters[2] != 0.0) ? (int)p->parameters[2] : 1;
+	double blend = (p->parameters[3] >= 0.0 && p->parameters[3] <= 1.0) ? p->parameters[3] : 1.0;
 
 	int bpp    = (img->bits_per_pixel + 7) / 8;
 	int stride = img->bytes_per_line;

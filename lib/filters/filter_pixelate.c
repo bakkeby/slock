@@ -1,7 +1,7 @@
 void
-filter_pixelate(XImage *img, double parameters[8], struct lock *lock)
+filter_pixelate(XImage *img, EffectParams *p, struct lock *lock)
 {
-	int block_size = (int)parameters[0];
+	int block_size = (int)p->parameters[0];
 	int width  = img->width;
 	int height = img->height;
 	int bpp    = img->bits_per_pixel / 8;

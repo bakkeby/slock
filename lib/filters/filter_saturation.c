@@ -6,13 +6,13 @@
  *                 >1.0 = boost saturation
  * ---------------------------------------------------------------------- */
 void
-filter_saturation(XImage *img, double parameters[8], struct lock *lock)
+filter_saturation(XImage *img, EffectParams *p, struct lock *lock)
 {
 	if (!img || !img->data || !lock || !lock->m)
 		return;
 
 	Monitor *m;
-	double factor = parameters[0]; /* 0.0=gray, 1.0=no change, >1=boost */
+	double factor = p->parameters[0]; /* 0.0=gray, 1.0=no change, >1=boost */
 	if (factor < 0.0) factor = 0.0;
 
 	int bpp = (img->bits_per_pixel + 7) / 8;

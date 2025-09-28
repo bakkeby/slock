@@ -1,13 +1,13 @@
 void
-filter_ghosting(XImage *img, double parameters[8], struct lock *lock)
+filter_ghosting(XImage *img, EffectParams *p, struct lock *lock)
 {
 	if (!img || !img->data) return;
 	int bpp = img->bits_per_pixel / 8;
 	if (bpp < 3) return;
 	int stride = img->bytes_per_line;
 
-	int shift = (int)parameters[0];      /* ghost offset in pixels */
-	double alpha = parameters[1];        /* blend factor, 0–1 */
+	int shift = (int)p->parameters[0];      /* ghost offset in pixels */
+	double alpha = p->parameters[1];        /* blend factor, 0–1 */
 	if (alpha < 0) alpha = 0;
 	if (alpha > 1) alpha = 1;
 

@@ -1,10 +1,10 @@
 void
-filter_logo(XImage *img, double parameters[8], struct lock *lock)
+filter_logo(XImage *img, EffectParams *p, struct lock *lock)
 {
 	if (!img || !img->data | !lock->rectangles)
 		return;
 
-	int fg = lock->colors[CLAMP((int)parameters[0], 0, NUMCOLS - 1)];
+	int fg = lock->colors[CLAMP((int)p->parameters[0], 0, NUMCOLS - 1)];
 	int bpp    = img->bits_per_pixel / 8;
 	int stride = img->bytes_per_line;
 

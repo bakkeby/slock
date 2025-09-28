@@ -19,18 +19,3 @@ resizerectangles(struct lock *lock)
 		lock->rectangles[i].height = rectangles[i].height * logosize;
 	}
 }
-
-static void
-drawlogo(Display *dpy, struct lock *lock, int fg)
-{
-	double parameters[8] = { fg };
-	filter_logo(image, parameters, lock);
-
-	/* Push image into pixmap and set window background */
-	XShmPutImage(dpy, lock->bgmap, lock->gc, image,
-             0, 0, 0, 0, lock->x, lock->y, False);
-	XSetWindowBackgroundPixmap(dpy, lock->win, lock->bgmap);
-	XClearWindow(dpy, lock->win);
-	XFlush(dpy);
-	XSync(dpy, False);
-}
