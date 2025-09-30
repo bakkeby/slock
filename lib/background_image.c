@@ -129,7 +129,7 @@ random_file_from_dir(const char *dirname)
 }
 
 int
-load_image_from_string(Display *dpy, Monitor *m, const char *file_or_directory)
+load_image_from_string(Display *dpy, Monitor *m, const char *file_or_directory, float blend)
 {
 	struct stat statbuf;
 	int ret = 0;
@@ -152,7 +152,7 @@ load_image_from_string(Display *dpy, Monitor *m, const char *file_or_directory)
 		filename = strdup(expanded);
 	}
 
-	ret = load_image_from_file(dpy, m, filename);
+	ret = load_image_from_file(dpy, m, filename, blend);
 	free(filename);
 
 bail:
@@ -161,7 +161,7 @@ bail:
 }
 
 int
-load_image_from_file(Display *dpy, Monitor *m, const char *filename)
+load_image_from_file(Display *dpy, Monitor *m, const char *filename, float blend)
 {
 	if (!filename || !strlen(filename))
 		return 0;
@@ -207,7 +207,7 @@ load_image_from_file(Display *dpy, Monitor *m, const char *filename)
 			uint8_t g = (argb >> 8)  & 0xFF;
 			uint8_t b = (argb)       & 0xFF;
 
-			float alpha = a / 255.0f;
+			float alpha = MAX((a / 255.0f) - (1.0 - blend), 0.0);
 
 			uint8_t *dst = row + (start_x + x) * bpp;
 
@@ -282,7 +282,7 @@ load_image_from_file(Display *dpy, Monitor *m, const char *filename)
 			uint8_t b8 = b16 >> 8;
 			uint8_t a8 = a16 >> 8;
 
-			float alpha = a8 / 255.0f;
+			float alpha = MAX((a8 / 255.0f) - (1.0 - blend), 0.0);
 
 			uint8_t *dst = row + (start_x + x) * bpp;
 

@@ -366,14 +366,15 @@ load_filters(config_setting_t *filters_t, int *num_filters, EffectParams **filte
 
 		/* Second pass: assign values */
 		int str_index = 0;
-		for (p = 0; p < num_params && p < 8; p++) {
+		int p_idx = 0;
+		for (p = 0; p < num_params && p_idx < 8; p++) {
 			param_t = config_setting_get_elem(params_t, p);
 			if (config_setting_type(param_t) == CONFIG_TYPE_STRING &&
 					!config_setting_parse_float_string(param_t)) {
 				string = config_setting_get_string(param_t);
 				(*filters)[i].string_parameters[str_index++] = strdup(string);
 			} else {
-				(*filters)[i].parameters[p] = setting_get_float_elem(params_t, p);
+				(*filters)[i].parameters[p_idx++] = setting_get_float_elem(params_t, p);
 			}
 		}
 	}
