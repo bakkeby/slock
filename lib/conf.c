@@ -171,7 +171,7 @@ load_fallback_config(void)
 void
 cleanup_config(void)
 {
-	int i;
+	int i, s;
 
 	free(user);
 	free(group);
@@ -197,6 +197,26 @@ cleanup_config(void)
 	}
 	free(secret_commands);
 
+	for (i = 0; i < num_background_filters; i++) {
+		for (s = 0; s < background_filters[i].num_string_parameters; s++) {
+			free(background_filters[i].string_parameters[s]);
+		}
+	}
+	free(background_filters);
+
+	for (i = 0; i < num_feedback_filters; i++) {
+		for (s = 0; s < feedback_filters[i].num_string_parameters; s++) {
+			free(feedback_filters[i].string_parameters[s]);
+		}
+	}
+	free(feedback_filters);
+
+	for (i = 0; i < num_failure_filters; i++) {
+		for (s = 0; s < failure_filters[i].num_string_parameters; s++) {
+			free(failure_filters[i].string_parameters[s]);
+		}
+	}
+	free(failure_filters);
 }
 
 void
