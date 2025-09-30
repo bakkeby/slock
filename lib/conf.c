@@ -383,7 +383,7 @@ void
 load_auto_timeout(config_t *cfg)
 {
 	config_lookup_int(cfg, "automatic_timeout.after_this_many_seconds", &auto_timeout_offset);
-	config_lookup_int(cfg, "automatic_timeout.run_once", &auto_timeout_run_once);
+	config_lookup_sloppy_bool(cfg, "automatic_timeout.run_once", &auto_timeout_run_once);
 	config_lookup_strdup(cfg, "automatic_timeout.run_command", &auto_timeout_command);
 }
 
