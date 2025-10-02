@@ -25,6 +25,7 @@ static void filter_dual_kawase_blur(XImage *img, EffectParams *p, struct lock *l
 static void filter_film_grain(XImage *img, EffectParams *p, struct lock *lock);
 static void filter_flip(XImage *img, EffectParams *p, struct lock *lock);
 static void filter_ghosting(XImage *img, EffectParams *p, struct lock *lock);
+static void filter_gradient_map(XImage *img, EffectParams *p, struct lock *lock);
 static void filter_grayscale(XImage *img, EffectParams *p, struct lock *lock);
 static void filter_halftone(XImage *img, EffectParams *p, struct lock *lock);
 static void filter_horizontal_tear(XImage *img, EffectParams *p, struct lock *lock);
@@ -38,6 +39,7 @@ static void filter_modulation_glitch(XImage *img, EffectParams *p, struct lock *
 static void filter_mosaic(XImage *img, EffectParams *p, struct lock *lock);
 static void filter_pixelate(XImage *img, EffectParams *p, struct lock *lock);
 static void filter_posterize(XImage *img, EffectParams *p, struct lock *lock);
+static void filter_posterize_bit_depth(XImage *img, EffectParams *p, struct lock *lock);
 static void filter_random_blocks(XImage *img, EffectParams *p, struct lock *lock);
 static void filter_saturation(XImage *img, EffectParams *p, struct lock *lock);
 static void filter_scanlines(XImage *img, EffectParams *p, struct lock *lock);
@@ -80,6 +82,7 @@ static const struct effect_map effect_names[] = {
 	{ "film_grain", filter_film_grain },
 	{ "flip", filter_flip },
 	{ "ghosting", filter_ghosting },
+	{ "gradient_map", filter_gradient_map },
 	{ "grayscale", filter_grayscale },
 	{ "greyscale", filter_grayscale },
 	{ "halftone", filter_halftone },
@@ -94,6 +97,7 @@ static const struct effect_map effect_names[] = {
 	{ "soft_noise", filter_soft_noise },
 	{ "pixelate", filter_pixelate },
 	{ "posterize", filter_posterize },
+	{ "posterize_bit_depth", filter_posterize_bit_depth },
 	{ "random_blocks", filter_random_blocks },
 	{ "rain_shift_vert", filter_rain_shift_vert },
 	{ "rain_shift_horz", filter_rain_shift_horz },

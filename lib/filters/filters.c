@@ -13,6 +13,7 @@
 #include "filter_film_grain.c"
 #include "filter_flip.c"
 #include "filter_ghosting.c"
+#include "filter_gradient_map.c"
 #include "filter_grayscale.c"
 #include "filter_halftone.c"
 #include "filter_horizontal_tear.c"
