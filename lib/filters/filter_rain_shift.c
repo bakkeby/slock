@@ -22,9 +22,9 @@ filter_rain_shift_vert(XImage *img, EffectParams *p, struct lock *lock)
 		return;
 
 	for (m = lock->m; m; m = m->next) {
-		for (int x = m->mx; x < m->mw; ++x) {
+		for (int x = m->mx; x < m->mx + m->mw; ++x) {
 			/* copy column into temporary buffer */
-			for (int y = m->my; y < m->mh; ++y) {
+			for (int y = m->my; y < m->my + m->mh; ++y) {
 				unsigned char *src = (unsigned char *)img->data +
 									 y * img->bytes_per_line + x * bpp;
 				memcpy(col_buf + y * bpp, src, bpp);
@@ -33,10 +33,10 @@ filter_rain_shift_vert(XImage *img, EffectParams *p, struct lock *lock)
 			int offset = rand() % (max_shift + 1);   /* 0 … max_shift */
 
 			/* write column back, shifted downwards (wrap around) */
-			for (int y = m->my; y < m->mh; ++y) {
-				int src_y = (y - offset + m->mh) % m->mh;
+			for (int y = 0; y < m->mh; ++y) {
+				int src_y = m->my + (y - offset + m->mh) % m->mh;
 				unsigned char *dst = (unsigned char *)img->data +
-									 y * img->bytes_per_line + x * bpp;
+									 (m->my + y) * img->bytes_per_line + x * bpp;
 				memcpy(dst, col_buf + src_y * bpp, bpp);
 			}
 		}
@@ -70,11 +70,11 @@ filter_rain_shift_horz(XImage *img, EffectParams *p, struct lock *lock)
 	if (!row_buf) return;                       /* OOM guard */
 
 	for (m = lock->m; m; m = m->next) {
-		for (int y = m->my; y < m->mh; ++y) {
+		for (int y = m->my; y < m->my + m->mh; ++y) {
 			/* copy the whole row into row_buf */
 			unsigned char *src_row = (unsigned char *)img->data +
 									 y * img->bytes_per_line;
-			memcpy(row_buf, src_row, m->mw * bpp);
+			memcpy(row_buf, src_row, img->width * bpp);
 
 			/* pick a random horizontal offset: 0 … max_shift */
 			int offset = rand() % (max_shift + 1);
@@ -83,9 +83,9 @@ filter_rain_shift_horz(XImage *img, EffectParams *p, struct lock *lock)
 			if (rand() & 1) offset = -offset;      /* 50 % left, 50 % right */
 
 			/* write the row back, shifted with wrap‑around */
-			for (int x = m->mx; x < m->mw; ++x) {
-				int src_x = (x - offset + m->mw) % m->mw;
-				unsigned char *dst = src_row + x * bpp;
+			for (int x = 0; x <  m->mw; ++x) {
+				int src_x = m->mx + (x - offset + m->mw) % m->mw;
+				unsigned char *dst = src_row + (m->mx + x) * bpp;
 				memcpy(dst, row_buf + src_x * bpp, bpp);
 			}
 		}
