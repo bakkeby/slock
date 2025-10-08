@@ -450,7 +450,7 @@ lockscreen(Display *dpy, struct xrandr *rr, int screen)
 	char curs[] = {0, 0, 0, 0, 0, 0, 0, 0};
 	int i, ptgrab, kbgrab;
 	struct lock *lock;
-	Monitor *m, *mons = NULL;
+	Monitor *mons = NULL;
 	XColor color, dummy;
 	XSetWindowAttributes wa;
 	Cursor invisible;
