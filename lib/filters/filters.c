@@ -29,7 +29,6 @@
 #include "filter_rain_shift.c"
 #include "filter_saturation.c"
 #include "filter_scanlines.c"
-#include "filter_screenshot.c"
 #include "filter_sobel.c"
 #include "filter_solid.c"
 #include "filter_temperature.c"

@@ -18,11 +18,6 @@ PKG_CONFIG = pkg-config
 # Uncomment for NetBSD
 #NETBSD=-D_NETBSD_SOURCE
 
-# Optionally Xinerama can be used for multi-monitor awareness.
-# Used for background and logo positioning.
-XINERAMA=-lXinerama
-XINERAMAFLAGS = -DXINERAMA
-
 # Optionally slock can be compiled with PAM authentication support
 #PAMLIB=-lpam
 #PAM=-DHAVE_PAM=1
@@ -44,10 +39,10 @@ CONFIG = `$(PKG_CONFIG) --libs libconfig`
 
 # includes and libs
 INCS = -I. -I/usr/include -I${X11INC}
-LIBS = -L/usr/lib -lc -lcrypt -L${X11LIB} -lX11 -lm -lXext -lXrandr ${XINERAMA} ${CONFIG} ${PAMLIB} ${IMLIB}
+LIBS = -L/usr/lib -lc -lcrypt -L${X11LIB} -lX11 -lm -lXext -lXrandr ${CONFIG} ${PAMLIB} ${IMLIB}
 
 # flags
-CPPFLAGS = -DVERSION=\"${VERSION}\" -D_DEFAULT_SOURCE -DHAVE_SHADOW_H ${XINERAMAFLAGS} ${DPMS} ${PAM} ${IM} ${BSD} ${THREAD} ${NETBSD}
+CPPFLAGS = -DVERSION=\"${VERSION}\" -D_DEFAULT_SOURCE -DHAVE_SHADOW_H ${DPMS} ${PAM} ${IM} ${BSD} ${THREAD} ${NETBSD}
 CFLAGS = -std=c99 -pedantic -Wall -Wno-unused-function -Os ${INCS} ${CPPFLAGS}
 LDFLAGS = -s ${LIBS}
 COMPATSRC = explicit_bzero.c

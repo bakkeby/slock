@@ -25,12 +25,8 @@
 #include <time.h>
 #include <X11/XKBlib.h>
 #include <X11/XF86keysym.h>
-#include <time.h>
 #if HAVE_DPMS
 #include <X11/extensions/dpms.h>
-#endif
-#ifdef XINERAMA
-#include <X11/extensions/Xinerama.h>
 #endif
 
 #include "arg.h"
@@ -406,6 +402,48 @@ readpw(Display *dpy, struct xrandr *rr, struct lock **locks, int nscreens, const
 	}
 }
 
+static Monitor *
+get_monitors(Display *dpy, Window root)
+{
+	XRRScreenResources *res = XRRGetScreenResourcesCurrent(dpy, root);
+	if (!res) {
+		fprintf(stderr, "Failed to get XRandR screen resources\n");
+		return NULL;
+	}
+
+	Monitor *head = NULL;
+	Monitor *tail = NULL;
+
+	for (int i = 0; i < res->ncrtc; i++) {
+		XRRCrtcInfo *crtc_info = XRRGetCrtcInfo(dpy, res, res->crtcs[i]);
+		if (!crtc_info)
+			continue;
+
+		/* Skip disabled CRTCs */
+		if (crtc_info->width == 0 || crtc_info->height == 0) {
+			XRRFreeCrtcInfo(crtc_info);
+			continue;
+		}
+
+		if (!head) {
+			tail = head = ecalloc(1, sizeof(Monitor));
+		} else {
+			tail = tail->next = ecalloc(1, sizeof(Monitor));
+		}
+
+		tail->mx = crtc_info->x;
+		tail->my = crtc_info->y;
+		tail->mw = crtc_info->width;
+		tail->mh = crtc_info->height;
+		tail->dpy = i;
+
+		XRRFreeCrtcInfo(crtc_info);
+	}
+
+	XRRFreeScreenResources(res);
+	return head;
+}
+
 static struct lock *
 lockscreen(Display *dpy, struct xrandr *rr, int screen)
 {
@@ -437,39 +475,9 @@ lockscreen(Display *dpy, struct xrandr *rr, int screen)
 	lock->x = DisplayWidth(dpy, lock->screen);
 	lock->y = DisplayHeight(dpy, lock->screen);
 
-	#ifdef XINERAMA
-	if ((info = XineramaQueryScreens(dpy, &n))) {
-		for (i = 0; i < n; i++) {
-			int unique = 1;
-			/* Identify unique monitors */
-			for (m = mons; m && m->next; m = m->next) {
-				if (m->mx == info[i].x_org &&
-					m->my == info[i].y_org &&
-					m->mw == info[i].width &&
-					m->mh == info[i].height
-				) {
-					unique = 0;
-					break;
-				}
-			}
-			if (!unique)
-				continue;
+	mons = get_monitors(dpy, lock->root);
 
-			if (!mons) {
-				mons = m = ecalloc(1, sizeof(Monitor));
-			} else {
-				for (m = mons; m && m->next; m = m->next);
-				m = m->next = ecalloc(1, sizeof(Monitor));
-			}
-
-			m->mx = info[i].x_org;
-			m->my = info[i].y_org;
-			m->mw = info[i].width;
-			m->mh = info[i].height;
-		}
-	} else
-	#endif // XINERAMA
-	{
+	if (!mons) {
 		mons = ecalloc(1, sizeof(Monitor));
 		mons->mx = 0;
 		mons->my = 0;
