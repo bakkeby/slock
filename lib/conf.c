@@ -328,6 +328,7 @@ void
 load_filters(config_setting_t *filters_t, int *num_filters, EffectParams **filters)
 {
 	int i, p, num_params;
+	double val;
 
 	const char *string;
 	const config_setting_t *filter_t, *params_t, *param_t;
@@ -355,8 +356,9 @@ load_filters(config_setting_t *filters_t, int *num_filters, EffectParams **filte
 		for (p = 0; p < num_params; p++) {
 			param_t = config_setting_get_elem(params_t, p);
 			if (config_setting_type(param_t) == CONFIG_TYPE_STRING &&
-					!config_setting_parse_float_string(param_t))
+					!config_setting_parse_float_string(param_t, &val)) {
 				str_count++;
+			}
 		}
 
 		if (str_count > 0) {
@@ -370,7 +372,7 @@ load_filters(config_setting_t *filters_t, int *num_filters, EffectParams **filte
 		for (p = 0; p < num_params && p_idx < 8; p++) {
 			param_t = config_setting_get_elem(params_t, p);
 			if (config_setting_type(param_t) == CONFIG_TYPE_STRING &&
-					!config_setting_parse_float_string(param_t)) {
+					!config_setting_parse_float_string(param_t, &val)) {
 				string = config_setting_get_string(param_t);
 				(*filters)[i].string_parameters[str_index++] = strdup(string);
 			} else {
