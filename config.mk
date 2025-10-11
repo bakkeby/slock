@@ -36,10 +36,11 @@ PKG_CONFIG = pkg-config
 #THREAD=-DHAVE_PTHREAD=1
 
 CONFIG = `$(PKG_CONFIG) --libs libconfig`
+BZ2 = `$(PKG_CONFIG) --libs bzip2`
 
 # includes and libs
 INCS = -I. -I/usr/include -I${X11INC}
-LIBS = -L/usr/lib -lc -lcrypt -L${X11LIB} -lX11 -lm -lXext -lXrandr ${CONFIG} ${PAMLIB} ${IMLIB}
+LIBS = -L/usr/lib -lc -lcrypt -L${X11LIB} -lX11 -lm -lXext -lXrandr ${CONFIG} ${BZ2} ${PAMLIB} ${IMLIB}
 
 # flags
 CPPFLAGS = -DVERSION=\"${VERSION}\" -D_DEFAULT_SOURCE -DHAVE_SHADOW_H ${DPMS} ${PAM} ${IM} ${BSD} ${THREAD} ${NETBSD}
