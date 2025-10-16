@@ -21,6 +21,7 @@ static void filter_color_bleed(XImage *img, EffectParams *p, struct lock *lock);
 static void filter_contrast(XImage *img, EffectParams *p, struct lock *lock);
 static void filter_crt_effect(XImage *img, EffectParams *p, struct lock *lock);
 static void filter_emboss(XImage *img, EffectParams *p, struct lock *lock);
+static void filter_dropshadow(XImage *img, EffectParams *p, struct lock *lock);
 static void filter_dual_kawase_blur(XImage *img, EffectParams *p, struct lock *lock);
 static void filter_film_grain(XImage *img, EffectParams *p, struct lock *lock);
 static void filter_flip(XImage *img, EffectParams *p, struct lock *lock);
@@ -35,8 +36,8 @@ static void filter_invert(XImage *img, EffectParams *p, struct lock *lock);
 static void filter_logo(XImage *img, EffectParams *p, struct lock *lock);
 static void filter_noise(XImage *img, EffectParams *p, struct lock *lock);
 static void filter_soft_noise(XImage *img, EffectParams *p, struct lock *lock);
+static void filter_mask(XImage *img, EffectParams *p, struct lock *lock);
 static void filter_modulation_glitch(XImage *img, EffectParams *p, struct lock *lock);
-static void filter_mosaic(XImage *img, EffectParams *p, struct lock *lock);
 static void filter_pixelate(XImage *img, EffectParams *p, struct lock *lock);
 static void filter_posterize(XImage *img, EffectParams *p, struct lock *lock);
 static void filter_posterize_bit_depth(XImage *img, EffectParams *p, struct lock *lock);
@@ -57,10 +58,6 @@ static void filter_vhs_warp_chroma(XImage *img, EffectParams *p, struct lock *lo
 static void filter_wallpaper(XImage *img, EffectParams *p, struct lock *lock);
 static void filter_wave_distortion(XImage *img, EffectParams *p, struct lock *lock);
 
-static inline uint8_t clamp255(int v) {
-	return v < 0 ? 0 : (v > 255 ? 255 : v);
-}
-
 struct effect_map {
 	const char *name;
 	FilterFunc *func;
@@ -77,6 +74,7 @@ static const struct effect_map effect_names[] = {
 	{ "color_bleed", filter_color_bleed },
 	{ "contrast", filter_contrast },
 	{ "crt_effect", filter_crt_effect },
+	{ "drop_shadow", filter_dropshadow },
 	{ "dual_kawase_blur", filter_blur },
 	{ "emboss", filter_emboss },
 	{ "relief", filter_emboss },
@@ -92,8 +90,8 @@ static const struct effect_map effect_names[] = {
 	{ "image", filter_image },
 	{ "invert", filter_invert },
 	{ "logo", filter_logo },
+	{ "mask", filter_mask },
 	{ "modulation_glitch", filter_modulation_glitch },
-	{ "mosaic", filter_mosaic },
 	{ "noise", filter_noise },
 	{ "soft_noise", filter_soft_noise },
 	{ "pixelate", filter_pixelate },
