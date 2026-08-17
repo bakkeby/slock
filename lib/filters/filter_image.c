@@ -126,7 +126,6 @@ void
 filter_mask(XImage *img, EffectParams *p, struct lock *lock)
 {
 	Monitor *m;
-	int idx;
 
 	if (!p->num_string_parameters)
 		return;
@@ -140,7 +139,7 @@ filter_mask(XImage *img, EffectParams *p, struct lock *lock)
 		.blend_position = TILE,
 	};
 
-	for (m = lock->m, idx = 0; m; m = m->next, idx++) {
+	for (m = lock->m; m; m = m->next) {
 		load_image_from_string(lock->dpy, m, img, p->string_parameters[0], &options);
 	}
 }
